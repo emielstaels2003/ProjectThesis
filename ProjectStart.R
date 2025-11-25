@@ -62,18 +62,6 @@ chartSeries(KBC.BR,
 
 
 #DATASET PRICES OMVORMEN NAAR EEN DATASET RETURNS 
-install.packages("tidyverse")
-library(tidyverse)
-prices$date <- as.Date(rownames(prices))  # als datums in rijnamen staan
-returns <- prices %>%
-  arrange(date) %>%                        # sorteer op datum
-  mutate(across(-date,                     # pas toe op alle kolommen behalve 'date'
-                ~ (.x / dplyr::lag(.x)) - 1,  # (Pt / Pt-1) - 1
-                .names = "{.col}"))        # behoud zelfde kolomnamen
-head(returns)
-summary(returns)
-
-
 library(tidyverse)
 prices <- data.frame(date = index(prices), coredata(prices))
 # Zorg dat 'date' een Date-kolom is

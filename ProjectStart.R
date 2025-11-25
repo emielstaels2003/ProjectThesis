@@ -1,13 +1,10 @@
-#jasper github test 
-#emiel 
-#jasper
 install.packages("quantmod")
 library(quantmod)
 
 #INLADEN DATASET SPEECHES
 speeches <- readRDS("CBS_dataset_v1.0.rds")
 #https://cbspeeches.com/
-
+#dit om data online naar R te brengen
 
 #INLEZEN EN MAKEN VAN DATASET PRICES
 tickers <- c(

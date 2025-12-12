@@ -4,6 +4,11 @@ library(quantmod)
 #INLADEN DATASET SPEECHES
 speeches <- readRDS("CBS_dataset_v1.0.rds")
 #https://cbspeeches.com/
+cb_counts <- table(speeches$CentralBank)
+cb_matrix <- cbind(CentralBank = names(cb_counts),
+                   Observations = as.numeric(cb_counts))
+cb_matrix
+
 #dit om data online naar R te brengen
 
 #INLEZEN EN MAKEN VAN DATASET PRICES

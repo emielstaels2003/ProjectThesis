@@ -1,3 +1,5 @@
+x=1
+
 install.packages("quantmod")
 library(quantmod)
 
@@ -50,7 +52,34 @@ tickers <- c(
   # Emerging markets
   "ITUB", "BBD", "GFNORTEO.MX", "SBK.JO", "ABG.JO", "0011.HK", "0023.HK"
 )
-getSymbols(tickers, from = "1986-01-01", to = "2023-11-30")
+
+tickers1 <- c(
+  # Globale Indexen
+  "^GSPC",      # S&P 500 Index (Globale/VS Markt Benchmark)
+  "^MSCI",      # MSCI World Index (Globale Markt Benchmark)
+  
+  # Regionale Financiële Indexen (Proxies voor Afhankelijke Variabele R_it)
+  "^FCHI",      # CAC 40 Index (Proxy Eurozone - stabiel op Yahoo)
+  "^FTSE",      # FTSE 100 Index (Proxy VK Financiële Sector)
+  "^N225",      # Nikkei 225 Index (Proxy Japanse Markt)
+  "^OMXC25",    # OMX Kopenhagen (Proxy Scandinavië/Noorden)
+  "^SSMI",      # Swiss Market Index (Proxy Zwitserse Markt)
+  
+  # Individuele SIFIs (Voor Bèta-Analyse)
+  "JPM",        # JPMorgan Chase (VS)
+  "BNP.PA",     # BNP Paribas (Eurozone - Parijs)
+  "HSBA.L",     # HSBC Holdings (VK - Londen)
+  "UBSG.SW"     # UBS Group (Zwitserland - Zürich)
+)
+
+# Test de nieuwe lijst
+prices1 <- getSymbols(tickers1, 
+                               src = "yahoo", 
+                               from = "1986-01-01", 
+                               to = "2023-11-30", 
+                               auto.assign = TRUE)
+
+getSymbols(tickers1, from = "1986-01-01", to = "2023-11-30")
 prices <- do.call(merge, lapply(tickers, function(t) Ad(get(t))))
 colnames(prices) <- tickers
 

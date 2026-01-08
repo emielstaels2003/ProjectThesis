@@ -1,11 +1,9 @@
-x=1
 
-# testtest
-
-install.packages("quantmod")
+#install.packages("quantmod")
 library(quantmod)
 
 #INLADEN DATASET SPEECHES
+getwd()
 speeches <- readRDS("CBS_dataset_v1.0.rds")
 #https://cbspeeches.com/
 cb_counts <- table(speeches$CentralBank)
@@ -82,12 +80,29 @@ prices1 <- getSymbols(tickers1,
                                auto.assign = TRUE)
 
 getSymbols(tickers1, from = "1986-01-01", to = "2023-11-30")
+
+#test de oude lijst
+#deze vorige lijn kan lang duren om in te laden
+#creates object with the name of the ticker
+prices <- getSymbols(tickers, 
+                      src = "yahoo", 
+                      from = "1986-01-01", 
+                      to = "2023-11-30", 
+                      auto.assign = TRUE)
+
+
+getSymbols(tickers, from = "1986-01-01", to = "2023-11-30")
+#get(t) gets xts of ticker t
+#ad = adj close column
+#do.call(merge, my_list) is a trick to pass a list of objects to merge.
+#Result: a single xts object, where each column is the Adjusted Close price for one ticker, and rows are dates.
 prices <- do.call(merge, lapply(tickers, function(t) Ad(get(t))))
 colnames(prices) <- tickers
+#to view all the adj closing prices of a certain ticket by date
+prices$JPM
 
-
-#Maak een mooie grafiek met de Adjusted Close-prijs
-getSymbols("KBC.BR", from = "2000-01-01", to = Sys.Date())
+#Maakprices#Maak een mooie grafiek met de Adjusted Close-prijs
+getSymbols("KBC.BR", from = "1986-01-01", to = "2023-11-30")
 chartSeries(KBC.BR,
             type = "line",             # lijnplot
             subset = "2000::2025",     # periode
@@ -97,6 +112,7 @@ chartSeries(KBC.BR,
 
 
 #DATASET PRICES OMVORMEN NAAR EEN DATASET RETURNS 
+#xts obj wordt gwn data frame om te kunnen plotten enzo
 library(tidyverse)
 prices <- data.frame(date = index(prices), coredata(prices))
 # Zorg dat 'date' een Date-kolom is

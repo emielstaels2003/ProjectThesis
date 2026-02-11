@@ -11,7 +11,27 @@ cb_matrix <- cbind(CentralBank = names(cb_counts),
                    Observations = as.numeric(cb_counts))
 cb_matrix
 
-#dit om data online naar R te brengen
+speeches_cleaned <- speeches
+fed_indices <- grepl("Federal Reserve|Board of Governors", speeches_cleaned$CentralBank)
+speeches_cleaned$CentralBank[fed_indices] <- "US Federal Reserve System"
+
+# 3. Nieuwe tabel maken met de samengevoegde counts
+cb_counts_new <- table(speeches_cleaned$CentralBank)
+
+# 4. Filteren op de drempelwaarde van 500 observaties
+cb_counts_filtered <- cb_counts_new[cb_counts_new > 500]
+
+# 5. De definitieve matrix maken
+cb_matrix_final <- cbind(CentralBank = names(cb_counts_filtered), 
+                         Observations = as.numeric(cb_counts_filtered))
+
+# Optioneel: Sorteren op aantal observaties voor een beter overzicht
+cb_matrix_final <- cb_matrix_final[order(as.numeric(cb_matrix_final[,2]), decreasing = TRUE), ]
+
+# Resultaat bekijken
+print(cb_matrix_final)
+
+# voorstel om alle verschillende Fed te clusteren
 
 #INLEZEN EN MAKEN VAN DATASET PRICES
 tickers <- c(

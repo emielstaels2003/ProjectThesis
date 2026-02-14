@@ -1,5 +1,3 @@
-x=1
-
 install.packages("quantmod")
 library(quantmod)
 
@@ -73,24 +71,66 @@ tickers <- c(
   "ITUB", "BBD", "GFNORTEO.MX", "SBK.JO", "ABG.JO", "0011.HK", "0023.HK"
 )
 
-tickers1 <- c(
-  # Globale Indexen
-  "^GSPC",      # S&P 500 Index (Globale/VS Markt Benchmark)
-  "^MSCI",      # MSCI World Index (Globale Markt Benchmark)
-  
-  # Regionale Financiële Indexen (Proxies voor Afhankelijke Variabele R_it)
-  "^FCHI",      # CAC 40 Index (Proxy Eurozone - stabiel op Yahoo)
-  "^FTSE",      # FTSE 100 Index (Proxy VK Financiële Sector)
-  "^N225",      # Nikkei 225 Index (Proxy Japanse Markt)
-  "^OMXC25",    # OMX Kopenhagen (Proxy Scandinavië/Noorden)
-  "^SSMI",      # Swiss Market Index (Proxy Zwitserse Markt)
-  
-  # Individuele SIFIs (Voor Bèta-Analyse)
-  "JPM",        # JPMorgan Chase (VS)
-  "BNP.PA",     # BNP Paribas (Eurozone - Parijs)
-  "HSBA.L",     # HSBC Holdings (VK - Londen)
-  "UBSG.SW"     # UBS Group (Zwitserland - Zürich)
+# Market Indices gekoppeld aan Centrale Banken
+market_indices <- c(
+  "^GSPC",      # US Federal Reserve
+  "^STOXX50E",  # European Central Bank (Eurozone benchmark)
+  "^GDAXI",     # Deutsche Bundesbank (Duitsland)
+  "^FTSE",      # Bank of England (VK)
+  "^N225",      # Bank of Japan
+  "^SSMI",      # Swiss National Bank
+  "^GSPTSE",    # Bank of Canada
+  "^AXJO",      # Reserve Bank of Australia
+  "^BSESN",     # Reserve Bank of India
+  "^OMX",       # Sveriges Riksbank (Zweden)
+  "^OMXH25",    # Bank of Finland
+  "^FCHI",      # Bank of France
+  "FTSEMIB.MI", # Bank of Italy
+  "^IBEX",      # Bank of Spain
+  "^HSI",       # Hong Kong Monetary Authority
+  "^STI",       # Monetary Authority of Singapore
+  "^KLSE",      # Central Bank of Malaysia
+  "000001.SS",  # People's Bank of China
+  "^ISEQ",       # Central Bank of Ireland
+  "PSEI.PS"    # Bangko Sentral ng Pilipinas (Filipijnen)
 )
+
+# 2. Download de data naar een lijst (auto.assign = FALSE is cruciaal hier)
+market_data_list <- lapply(market_indices, function(x) {
+  message(paste("Bezig met downloaden van:", x))
+  getSymbols(x, src = "yahoo", from = "1986-01-01", to = "2023-11-30", auto.assign = FALSE)
+})
+
+# 3. Geef de lijst-items de namen van de tickers voor de herkenbaarheid
+names(market_data_list) <- market_indices
+
+# 4. Haal de Adjusted prijzen op en voeg ze samen in één tabel (xts object)
+# We gebruiken Ad() om de Adjusted Close kolom te pakken
+market_prices <- do.call(merge, lapply(market_data_list, Ad))
+
+# 5. Hernoem de kolommen naar de originele tickers (verwijder ".Adjusted" uit de namen)
+colnames(market_prices) <- market_indices
+
+# 6. Vul ontbrekende waarden in (voor feestdagen en tijdzone-verschillen)
+# na.locf = Last Observation Carried Forward
+market_prices_clean <- na.locf(market_prices, na.rm = FALSE)
+
+# 7. (Optioneel) Bereken de dagelijkse rendementen (Returns)
+# Dit is meestal wat je gebruikt in regressies of analyses
+market_returns <- diff(log(market_prices_clean))
+
+# Bekijk het resultaat
+head(market_prices_clean)
+summary(market_returns)
+
+#Maak een mooie grafiek met de Adjusted Close-prijs
+getSymbols("^ISEQ", from = "2000-01-01", to = Sys.Date())
+chartSeries(ISEQ,
+            type = "line",             # lijnplot
+            subset = "2000::2025",     # periode
+            theme = chartTheme("white"), 
+            name = "ISEQ (Adjusted Close Price)",
+            TA = NULL)                 # Geen extra indicatoren
 
 # Test de nieuwe lijst
 prices1 <- getSymbols(tickers1, 

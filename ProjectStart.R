@@ -1,5 +1,3 @@
-#goat
-h
 install.packages("quantmod")
 library(quantmod)
 
@@ -65,53 +63,7 @@ market_indices <- c(
   "RY"   # Bangko Sentral ng Pilipinas (Filipijnen)
 )
 
-tickers1 <- c(
-  # Globale Indexen
-  "^GSPC",      # S&P 500 Index (Globale/VS Markt Benchmark)
-  "^MSCI",      # MSCI World Index (Globale Markt Benchmark)
-  
-  # Regionale Financiële Indexen (Proxies voor Afhankelijke Variabele R_it)
-  "^FCHI",      # CAC 40 Index (Proxy Eurozone - stabiel op Yahoo)
-  "^FTSE",      # FTSE 100 Index (Proxy VK Financiële Sector)
-  "^N225",      # Nikkei 225 Index (Proxy Japanse Markt)
-  "^OMXC25",    # OMX Kopenhagen (Proxy Scandinavië/Noorden)
-  "^SSMI",      # Swiss Market Index (Proxy Zwitserse Markt)
-  
-  # Individuele SIFIs (Voor Bèta-Analyse)
-  "JPM",        # JPMorgan Chase (VS)
-  "BNP.PA",     # BNP Paribas (Eurozone - Parijs)
-  "HSBA.L",     # HSBC Holdings (VK - Londen)
-  "UBSG.SW"     # UBS Group (Zwitserland - Zürich)
-)
 
-# Test de nieuwe lijst
-prices1 <- getSymbols(tickers1, 
-                               src = "yahoo", 
-                               from = "1986-01-01", 
-                               to = "2023-11-30", 
-                               auto.assign = TRUE)
-
-getSymbols(tickers1, from = "1986-01-01", to = "2023-11-30")
-
-#test de oude lijst
-#deze vorige lijn kan lang duren om in te laden
-#creates object with the name of the ticker
-prices <- getSymbols(tickers, 
-                      src = "yahoo", 
-                      from = "1986-01-01", 
-                      to = "2023-11-30", 
-                      auto.assign = TRUE)
-
-
-getSymbols(tickers, from = "1986-01-01", to = "2023-11-30")
-#get(t) gets xts of ticker t
-#ad = adj close column
-#do.call(merge, my_list) is a trick to pass a list of objects to merge.
-#Result: a single xts object, where each column is the Adjusted Close price for one ticker, and rows are dates.
-prices <- do.call(merge, lapply(tickers, function(t) Ad(get(t))))
-colnames(prices) <- tickers
-#to view all the adj closing prices of a certain ticket by date
-prices$JPM
 
 #INLADEN DATASET STOCK PRICES EN OMVORMEN NAAR LOG(RETURN) DATA
 
@@ -146,10 +98,6 @@ chartSeries(RY,
             name = "RY.TO (Adjusted Close Price)",
             TA = NULL)                 # Geen extra indicatoren
 
-
-
-#DATASET PRICES OMVORMEN NAAR EEN DATASET RETURNS 
-#xts obj wordt gwn data frame om te kunnen plotten enzo
 
 
 #CATEGORISATIE EN SCORING
@@ -410,4 +358,3 @@ coefplot(model_full_fe,
          dict = c(Tightness = "Tightness (Hawkishness)", 
                   Regulation = "Regulation Focus", 
                   Supervision = "Supervision Focus"))
-

@@ -1,3 +1,15 @@
+# --- STAP 0: DATUM & KOLOMNAAM REPARATIE ---
+# We zorgen dat de kolom altijd 'Date_Clean' heet om verwarring te voorkomen
+speeches_cleaned <- speeches_cleaned %>%
+  rename_with(~ "Date_Original", matches("^Date$|^date$")) %>%
+  mutate(Date_Clean = as.Date(as.character(Date_Original)))
+
+# Controleer of dit gewerkt heeft
+print("Check datums in speeches dataset:")
+print(head(speeches_cleaned$Date_Clean))
+
+
+
 # --- STAP 1: INITIALISATIE ---
 results_list <- list()
 counter <- 1

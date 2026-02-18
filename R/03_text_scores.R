@@ -64,9 +64,6 @@ table(speeches_cleaned$Supervision)
 
 #VERSCHIL IN REGULATION EN SUPERVISION VOOR FED BOARD EN FED REGIONALS (EERDER ZIEN ALS EEN OBSERVATIE)
 
-print("P-waarde Supervision:")
-print(t_test_sup$p.value)
-
 fed_vergelijking <- speeches_cleaned %>%
   filter(CentralBank %in% c("Fed: Regional Banks", "Fed: Board of Governors")) %>%
   group_by(CentralBank) %>%
@@ -90,4 +87,6 @@ print("P-waarde Regulation:")
 print(t_test_reg$p.value)
 print("P-waarde Supervision:")
 print(t_test_sup$p.value)
+
+
 

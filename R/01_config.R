@@ -1,7 +1,10 @@
-#keep this fil short, nothing that reads data
-
+#keep this file short, nothing that reads data
 
 # Packages
+install.packages("quantmod")
+if (!require("fixest")) install.packages("fixest")
+
+# Libraries
 library(dplyr)
 library(lubridate)
 library(ggplot2)

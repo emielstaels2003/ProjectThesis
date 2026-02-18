@@ -1,5 +1,16 @@
 #model
 
+# 2. De dataset voorbereiden
+# We zorgen dat Bank en CentralBank als 'factors' worden gezien voor de Fixed Effects
+analysis_data <- final_event_study_results %>%
+  mutate(
+    Bank = as.factor(Bank),
+    CentralBank = as.factor(CentralBank),
+    Year = as.factor(format(Date, "%Y"))
+  )
+
+
+
 # ------------------------------------------------------------------------------
 # MODEL 1: Basis OLS (zonder Fixed Effects)
 # ------------------------------------------------------------------------------

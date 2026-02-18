@@ -80,42 +80,7 @@ chartSeries(RY,
 Bank_Mapping <- read_excel("data/Bank_Mapping.xlsx")
 View(Bank_Mapping)
 
-speeches_cleaned <- speeches_cleaned %>%
-  rename_with(~ "Date_Original", matches("^Date$|^date$")) %>%
-  mutate(Date_Clean = as.Date(as.character(Date_Original)))
-
-speeches_cleaned <- speeches
-#Maak een index voor de "Board of Governors"
-board_indices <- grepl("Board of Governors", speeches_cleaned$CentralBank)
-#Maak een index voor de regionale banken 
-# (We zoeken naar "Federal Reserve Bank of" om bijv. New York, St. Louis, etc. te pakken)
-regional_indices <- grepl("Federal Reserve Bank of", speeches_cleaned$CentralBank)
-#Overschrijf de namen in de dataset
-speeches_cleaned$CentralBank[board_indices] <- "Fed: Board of Governors"
-speeches_cleaned$CentralBank[regional_indices] <- "Fed: Regional Banks"
-#Nieuwe tabel maken met de gesplitste counts
-cb_counts_new <- table(speeches_cleaned$CentralBank)
-#Filteren op de drempelwaarde van 500 observaties
-cb_counts_filtered <- cb_counts_new[cb_counts_new > 500]
-#De definitieve matrix maken
-cb_matrix_final <- cbind(CentralBank = names(cb_counts_filtered), 
-                         Observations = as.numeric(cb_counts_filtered))
-#Optioneel: Sorteren op aantal observaties voor een beter overzicht
-cb_matrix_final <- cb_matrix_final[order(as.numeric(cb_matrix_final[,2]), decreasing = TRUE), ]
-#Resultaat bekijken
-print(cb_matrix_final)
 
 
-
-
-
-# 2. De dataset voorbereiden
-# We zorgen dat Bank en CentralBank als 'factors' worden gezien voor de Fixed Effects
-analysis_data <- final_event_study_results %>%
-  mutate(
-    Bank = as.factor(Bank),
-    CentralBank = as.factor(CentralBank),
-    Year = as.factor(format(Date, "%Y"))
-  )
 
 

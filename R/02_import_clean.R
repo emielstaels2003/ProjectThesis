@@ -40,8 +40,6 @@ print(cb_matrix_final)
 
 
 
-
-
 #INLADEN DATASET STOCK PRICES EN OMVORMEN NAAR LOG(RETURN) DATA
 
 #Download de data naar een lijst (auto.assign = FALSE is cruciaal hier)

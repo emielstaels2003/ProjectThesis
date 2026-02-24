@@ -13,30 +13,68 @@ cb_matrix
 
 
 
-#TWEE GROEPEN MAKEN VOOR DE FED: BOARD EN REGIONAL BANKS
-
-speeches_cleaned <- speeches
-#Maak een index voor de "Board of Governors"
-board_indices <- grepl("Board of Governors", speeches_cleaned$CentralBank)
-#Maak een index voor de regionale banken 
-# (We zoeken naar "Federal Reserve Bank of" om bijv. New York, St. Louis, etc. te pakken)
-regional_indices <- grepl("Federal Reserve Bank of", speeches_cleaned$CentralBank)
-#Overschrijf de namen in de dataset
-speeches_cleaned$CentralBank[board_indices] <- "Fed: Board of Governors"
-speeches_cleaned$CentralBank[regional_indices] <- "Fed: Regional Banks"
-#Nieuwe tabel maken met de gesplitste counts
-cb_counts_new <- table(speeches_cleaned$CentralBank)
-#Filteren op de drempelwaarde van 500 observaties
-cb_counts_filtered <- cb_counts_new[cb_counts_new > 500]
-#De definitieve matrix maken
-cb_matrix_final <- cbind(CentralBank = names(cb_counts_filtered), 
-                         Observations = as.numeric(cb_counts_filtered))
-#Optioneel: Sorteren op aantal observaties voor een beter overzicht
-cb_matrix_final <- cb_matrix_final[order(as.numeric(cb_matrix_final[,2]), decreasing = TRUE), ]
-#Resultaat bekijken
-print(cb_matrix_final)
+# DE DATASET SPEECHES KLEINER MAKEN DOOR ENKEL DE G20 TE SELECTEREN 
 
 
+target_banks <- c(
+  "European Central Bank",
+  "Board of Governors of the Federal Reserve", 
+  "Reserve Bank of Australia",
+  "Bank of Mexico",
+  "Bank of Canada",
+  "Bank of Japan",
+  "Bank of England",
+  "Central Bank of Argentina",
+  "Central Bank of Brazil",
+  "People's Bank of China",
+  "Reserve Bank of India",
+  "Bank Indonesia",
+  "Bank of Korea",
+  "Bank of Russia",
+  "Saoedi Central Bank",
+  "Central Bank of the Republic of Turkey",
+  "South African Reserve Bank",
+  "Swiss National Bank "
+)
+
+tickers <- c(
+  "BNP.PA", "GLE.PA", "ACA.PA", "DBK.DE", "CBK.DE", "SAN.MC", "BBVA.MC", 
+  "UCG.MI", "INGA.AS", "NDA-FI.HE", "JPM", "BAC", "C", "GS", "MS", "WFC", 
+  "BK", "STT", "NTRS", "COF", "PNC", "TFC", "USB", "SCHW", "ALLY", "AXP", 
+  "CFG", "DFS", "FITB", "FCNCA", "HBAN", "KEY", "MTB", "RF", "SYF", 
+  "ANZ.AX", "CBA.AX", "NAB.AX", "WBC.AX", "RY.TO", "TD.TO", "BMO.TO", 
+  "BNS.TO", "CM.TO", "NA.TO", "8306.T", "8316.T", "8411.T", "8604.T", 
+  "HSBA.L", "BARC.L", "STAN.L", "NWG.L", "LLOY.L", "GGAL.BA", "BMA.BA", 
+  "BPAT", "BBAR.BA", "ITUB4.SA", "BBDC4.SA", "BBAS3.SA", "SANB11.SA", 
+  "601398.SS", "601988.SS", "601288.SS", "601939.SS", "601328.SS", 
+  "600036.SS", "601166.SS", "601998.SS", "600000.SS", "601658.SS", 
+  "SBIN.NS", "HDFCBANK.NS", "ICICIBANK.NS", "BMRI.JK", "BBRI.JK", 
+  "BBCA.JK", "BBNI.JK", "BBTN.JK", "024110.KS", "SBER.ME", "VTBR.ME", 
+  "CBOM.ME", "ROSB.ME", "SVCB.ME", "1180.SR", "1120.SR", "1010.SR", 
+  "1060.SR", "1080.SR", "SBK.JO", "ABG.JO", "NED.JO", "CPI.JO", "FSR.JO", 
+  "GFNORTEO.MX", "BINBURSAO.MX", "SANMEXB.MX", "AKBNK.IS", "GARAN.IS", 
+  "ISCTR.IS", "HALKB.IS", "VAKBN.IS", "UBSG.SW"
+)
+aantal <- length(tickers)
+# Toon het resultaat in de console
+print(paste("De lijst bevat", aantal, "tickers."))
+
+market_data_list <- lapply(tickers, function(x) {
+  message(paste("Bezig met downloaden van:", x))
+  getSymbols(x, src = "yahoo", from = "1986-01-01", to = "2023-11-30", auto.assign = FALSE)
+})
+
+
+
+# Filter de speeches_cleaned dataset
+# De %in% operator kijkt of de waarde in CentralBank voorkomt in onze lijst
+speeches_subset <- speeches[speeches$CentralBank %in% target_banks, ]
+View(speeches_subset)
+
+
+# Importeer dataset met alle banken voor alle verschillende jaren
+Bank_year_data <- read_excel("data/Bank_Mapping_hardekopie.xlsx")
+View(Bank_year_data)
 
 
 
@@ -65,12 +103,12 @@ market_returns <- diff(log(market_prices_clean))
 
 # TEST VOOR STOCK PRICE DATA: GRAFIEK MAKEN VAN STOCK PRICE
 
-getSymbols("RY", from = "2000-01-01", to = Sys.Date())
-chartSeries(RY,
+getSymbols("KSA", from = "2000-01-01", to = Sys.Date())
+chartSeries(KSA,
             type = "line",             # lijnplot
             subset = "2000::2025",     # periode
             theme = chartTheme("white"), 
-            name = "RY.TO (Adjusted Close Price)",
+            name = "KSA (Adjusted Close Price)",
             TA = NULL)                 # Geen extra indicatoren
 
 

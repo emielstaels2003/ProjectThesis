@@ -1,12 +1,12 @@
 # --- STAP 0: DATUM & KOLOMNAAM REPARATIE ---
 # We zorgen dat de kolom altijd 'Date_Clean' heet om verwarring te voorkomen
-speeches_cleaned <- speeches_cleaned %>%
+speeches_subset <- speeches_subset %>%
   rename_with(~ "Date_Original", matches("^Date$|^date$")) %>%
   mutate(Date_Clean = as.Date(as.character(Date_Original)))
 
 # Controleer of dit gewerkt heeft
 print("Check datums in speeches dataset:")
-print(head(speeches_cleaned$Date_Clean))
+print(head(speeches_subset$Date_Clean))
 
 
 
@@ -43,7 +43,7 @@ for(j in 1:nrow(Bank_Mapping)) {
   returns_df <- data.frame(Date = as.Date(index(returns_combined)), coredata(returns_combined))
   
   # 3. Filter speeches voor deze specifieke centrale bank
-  relevant_speeches <- speeches_cleaned %>% 
+  relevant_speeches <- speeches_subset %>% 
     filter(trimws(CentralBank) == trimws(relevant_cb_name))
   
   message(paste("Gevonden speeches:", nrow(relevant_speeches)))

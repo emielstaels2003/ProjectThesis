@@ -20,7 +20,7 @@ dovish_terms  <- "\\b(decrease|lower|cut|easing|dovish|accommodative|stimulus|do
 reg_terms <- "\\b(basel|solvency|regulatory framework|capital requirement|leverage ratio|risk-weighting|own funds|capital buffer|liquidity ratio|lcr|nsfr|liquidity coverage|macroprudential|systemic risk|crr|crd)\\b"
 sup_terms <- "\\b(oversight|monitoring|inspection|examination|enforcement|sanctions|remedial action|early intervention|stress test|srep|audit|supervisory review|on-site|reporting obligations|disclosure|compliance)\\b"
 #Bereken de scores
-speeches_cleaned <- speeches_cleaned %>%
+speeches_subset <- speeches_subset %>%
   mutate(
     # Voorbereiding: tekst naar kleine letters en woordenaantal
     text_low = tolower(text),
@@ -38,24 +38,24 @@ speeches_cleaned <- speeches_cleaned %>%
   )
 #Omzetten naar finale variabelen
 # Voor Tightness gebruiken we de continue Z-score (nauwkeuriger voor regressie)
-speeches_cleaned <- speeches_cleaned %>%
+speeches_subset <- speeches_subset %>%
   mutate(
     Tightness = (raw_T_sentiment - mean(raw_T_sentiment, na.rm=TRUE)) / sd(raw_T_sentiment, na.rm=TRUE)
   )
 
 #Voor Regulation en Supervision behouden we de -1, 0, 1 intervallen (robuustheid)
 # (Gebruik de 'assign_trichotomous_score' functie die je al in je script had staan)
-speeches_cleaned <- speeches_cleaned %>%
+speeches_subset <- speeches_subset %>%
   mutate(
     Regulation  = assign_trichotomous_score(raw_R),
     Supervision = assign_trichotomous_score(raw_S)
   )
 #Controleer het resultaat
 print("Samenvatting Tightness (Z-score):")
-summary(speeches_cleaned$Tightness)
+summary(speeches_subset$Tightness)
 print("Verdeling Regulation & Supervision:")
-table(speeches_cleaned$Regulation)
-table(speeches_cleaned$Supervision)
+table(speeches_subset$Regulation)
+table(speeches_subset$Supervision)
 
 
 
@@ -63,8 +63,10 @@ table(speeches_cleaned$Supervision)
 
 
 #VERSCHIL IN REGULATION EN SUPERVISION VOOR FED BOARD EN FED REGIONALS (EERDER ZIEN ALS EEN OBSERVATIE)
+# dit is code om te kijken of er een verschil is tussen de regionale en overkoepelende qua communicatie en is gewoon een observatie
+# aangezien we reeds een subset gemaakt hebben van de data werkt dit niet meer en error maar niet erg eigenlijk
 
-fed_vergelijking <- speeches_cleaned %>%
+fed_vergelijking <- speeches_subset %>%
   filter(CentralBank %in% c("Fed: Regional Banks", "Fed: Board of Governors")) %>%
   group_by(CentralBank) %>%
   summarise(

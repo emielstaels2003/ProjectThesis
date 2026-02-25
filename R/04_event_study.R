@@ -14,20 +14,23 @@ print(head(speeches_subset$Date_Clean))
 results_list <- list()
 counter <- 1
 
+colnames(Bank_Mapping)
+
 # --- STAP 2: DE SYSTEMATISCHE LOOP ---
 for(j in 1:nrow(Bank_Mapping)) {
   
   current_bank       <- Bank_Mapping$Ticker[j]
   current_index      <- Bank_Mapping$Index_Ticker[j]
   relevant_cb_name   <- Bank_Mapping$CentralBank[j]
+  relevant_cb_year   <- Bank_Mapping$year[j]
   
   message(paste0("--- ANALYSE START: ", current_bank, " (", relevant_cb_name, ") ---"))
   
   # 1. Haal beursdata op
-  b_data <- try(getSymbols(current_bank, src = "yahoo", from = "1986-01-01", 
-                           to = "2023-11-30", auto.assign = FALSE), silent = TRUE)
-  i_data <- try(getSymbols(current_index, src = "yahoo", from = "1986-01-01", 
-                           to = "2023-11-30", auto.assign = FALSE), silent = TRUE)
+  b_data <- try(getSymbols(current_bank, src = "yahoo", from = paste0(relevant_cb_year, "-01-01"),
+                           to = paste0(relevant_cb_year, "-12-31"), auto.assign = FALSE), silent = TRUE)
+  i_data <- try(getSymbols(current_index, src = "yahoo", from = paste0(relevant_cb_year, "-01-01"),
+                           to = paste0(relevant_cb_year, "-12-31"), auto.assign = FALSE), silent = TRUE)
   
   if(inherits(b_data, "try-error") | inherits(i_data, "try-error")) {
     message(paste("Overgeslagen: Fout bij downloaden data voor", current_bank))

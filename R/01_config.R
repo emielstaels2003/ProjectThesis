@@ -42,14 +42,6 @@ market_indices <- c(
 )
 
 
-market_indices <- c(
-  "^STOXX50E", "^GSPC", "^AXJO", "^MXX", "^GSPTSE", 
-  "^N225", "^FTSE", "^MERV", "^BVSP", "000001.SS", 
-  "^BSESN", "^JKSE", "^KS11", "IMOEX.ME", "TASI.SR", 
-  "XU100.IS", "^J203.JO", "^SSMI"
-
-
-
 # Global settings
 EVENT_WINDOW <- c(-1, 1)      # trading days
 EST_WINDOW   <- c(-250, -30)  # trading days

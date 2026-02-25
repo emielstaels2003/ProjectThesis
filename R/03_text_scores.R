@@ -62,33 +62,7 @@ table(speeches_subset$Supervision)
 
 
 
-#VERSCHIL IN REGULATION EN SUPERVISION VOOR FED BOARD EN FED REGIONALS (EERDER ZIEN ALS EEN OBSERVATIE)
-# dit is code om te kijken of er een verschil is tussen de regionale en overkoepelende qua communicatie en is gewoon een observatie
-# aangezien we reeds een subset gemaakt hebben van de data werkt dit niet meer en error maar niet erg eigenlijk
 
-fed_vergelijking <- speeches_subset %>%
-  filter(CentralBank %in% c("Fed: Regional Banks", "Fed: Board of Governors")) %>%
-  group_by(CentralBank) %>%
-  summarise(
-    Gemiddelde_Regulation = mean(Regulation, na.rm = TRUE),
-    Gemiddelde_Supervision = mean(Supervision, na.rm = TRUE),
-    Aantal_Speeches = n()
-  )
-print(fed_vergelijking)
-fed_long <- fed_vergelijking %>%
-  pivot_longer(cols = c(Gemiddelde_Regulation, Gemiddelde_Supervision),
-               names_to = "Thema", values_to = "Score")
-
-ggplot(fed_long, aes(x = CentralBank, y = Score, fill = Thema)) +
-  geom_bar(stat = "identity", position = "dodge") +
-  theme_minimal() +
-  labs(title = "Focusverschil: Board vs Regional Banks", y = "Score", x = "Groep")
-t_test_reg <- t.test(Regulation ~ CentralBank, data = filter(speeches_cleaned, CentralBank %in% c("Fed: Regional Banks", "Fed: Board of Governors")))
-t_test_sup <- t.test(Supervision ~ CentralBank, data = filter(speeches_cleaned, CentralBank %in% c("Fed: Regional Banks", "Fed: Board of Governors")))
-print("P-waarde Regulation:")
-print(t_test_reg$p.value)
-print("P-waarde Supervision:")
-print(t_test_sup$p.value)
 
 
 

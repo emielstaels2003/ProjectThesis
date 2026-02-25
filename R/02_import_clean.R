@@ -12,7 +12,6 @@ cb_matrix <- cbind(CentralBank = names(cb_counts),
 cb_matrix
 
 
-
 # DE DATASET SPEECHES KLEINER MAKEN DOOR ENKEL DE G20 TE SELECTEREN 
 
 
@@ -41,18 +40,18 @@ tickers <- c(
   "BNP.PA", "GLE.PA", "ACA.PA", "DBK.DE", "CBK.DE", "SAN.MC", "BBVA.MC", 
   "UCG.MI", "INGA.AS", "NDA-FI.HE", "JPM", "BAC", "C", "GS", "MS", "WFC", 
   "BK", "STT", "NTRS", "COF", "PNC", "TFC", "USB", "SCHW", "ALLY", "AXP", 
-  "CFG", "DFS", "FITB", "FCNCA", "HBAN", "KEY", "MTB", "RF", "SYF", 
+  "CFG", "FITB", "FCNCA", "HBAN", "KEY", "MTB", "RF", "SYF", 
   "ANZ.AX", "CBA.AX", "NAB.AX", "WBC.AX", "RY.TO", "TD.TO", "BMO.TO", 
   "BNS.TO", "CM.TO", "NA.TO", "8306.T", "8316.T", "8411.T", "8604.T", 
   "HSBA.L", "BARC.L", "STAN.L", "NWG.L", "LLOY.L", "GGAL.BA", "BMA.BA", 
-  "BPAT", "BBAR.BA", "ITUB4.SA", "BBDC4.SA", "BBAS3.SA", "SANB11.SA", 
+  "BPAT.BA", "BBAR.BA", "ITUB4.SA", "BBDC4.SA", "BBAS3.SA", "SANB11.SA", 
   "601398.SS", "601988.SS", "601288.SS", "601939.SS", "601328.SS", 
   "600036.SS", "601166.SS", "601998.SS", "600000.SS", "601658.SS", 
   "SBIN.NS", "HDFCBANK.NS", "ICICIBANK.NS", "BMRI.JK", "BBRI.JK", 
   "BBCA.JK", "BBNI.JK", "BBTN.JK", "024110.KS", "SBER.ME", "VTBR.ME", 
-  "CBOM.ME", "ROSB.ME", "SVCB.ME", "1180.SR", "1120.SR", "1010.SR", 
+  "CBOM.ME", "1180.SR", "1120.SR", "1010.SR", 
   "1060.SR", "1080.SR", "SBK.JO", "ABG.JO", "NED.JO", "CPI.JO", "FSR.JO", 
-  "GFNORTEO.MX", "BINBURSAO.MX", "SANMEXB.MX", "AKBNK.IS", "GARAN.IS", 
+  "GFNORTEO.MX", "GFINBURO.MX", "AKBNK.IS", "GARAN.IS", 
   "ISCTR.IS", "HALKB.IS", "VAKBN.IS", "UBSG.SW"
 )
 aantal <- length(tickers)
@@ -73,8 +72,13 @@ View(speeches_subset)
 
 
 # Importeer dataset met alle banken voor alle verschillende jaren
-Bank_year_data <- read_excel("data/Bank_Mapping_hardekopie.xlsx")
-View(Bank_year_data)
+Bank_Mapping <- read_excel("data/Bank_Year_CB_Data.xlsx")
+View(Bank_Mapping)
+
+
+
+Crisis <- read_excel("data/Crisis.xlsx")
+View(Crisis)
 
 
 
@@ -111,10 +115,6 @@ chartSeries(KSA,
             name = "KSA (Adjusted Close Price)",
             TA = NULL)                 # Geen extra indicatoren
 
-
-
-Bank_Mapping <- read_excel("data/Bank_Mapping.xlsx")
-View(Bank_Mapping)
 
 
 

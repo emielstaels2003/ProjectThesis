@@ -68,12 +68,18 @@ market_data_list <- lapply(tickers, function(x) {
 # Filter de speeches_cleaned dataset
 # De %in% operator kijkt of de waarde in CentralBank voorkomt in onze lijst
 speeches_subset <- speeches[speeches$CentralBank %in% target_banks, ]
+
+speeches_subset$Date <- as.Date(speeches_subset$Date)
+
+# 3. Filteren op de juiste kolomnaam 'Date'
+speeches_subset <- speeches_subset[
+  !is.na(speeches_subset$Date) & 
+    speeches_subset$Date >= as.Date("1997-01-01") & 
+    speeches_subset$Date <= as.Date("2023-12-31"), 
+]
+
+# 5. Bekijk het resultaat
 View(speeches_subset)
-
-
-# Importeer dataset met alle banken voor alle verschillende jaren
-Bank_Mapping <- read_excel("data/Bank_Year_CB_Data.xlsx")
-View(Bank_Mapping)
 
 
 

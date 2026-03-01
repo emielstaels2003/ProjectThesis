@@ -225,3 +225,133 @@ if(length(results_list) > 0) {
 } else {
   message("FOUT: Controleer of de namen in Bank_Mapping$CentralBank exact matchen met speeches_cleaned.")
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# --- STAP 0: DATA PREPARATIE ---
+# Zorg voor schone datums en getrimde namen om matches te garanderen
+speeches_subset <- speeches_subset %>%
+  rename_with(~ "Date_Original", matches("^Date$|^date$")) %>%
+  mutate(
+    Date_Clean = as.Date(as.character(Date_Original)),
+    CentralBank = trimws(CentralBank)
+  )
+
+Bank_Mapping <- Bank_Mapping %>%
+  mutate(across(c(Ticker, Index_Ticker, CentralBank), trimws))
+
+# --- STAP 1: DATA DOWNLOAD (CACHE) ---
+# We downloaden alles in één keer. Dit voorkomt dat we in de loop 
+# duizenden keren verbinding moeten maken met Yahoo Finance.
+all_tickers <- unique(c(Bank_Mapping$Ticker, Bank_Mapping$Index_Ticker))
+
+message("Bezig met ophalen van alle beursdata...")
+market_data_list <- lapply(all_tickers, function(x) {
+  tryCatch({
+    getSymbols(x, src="yahoo", from="1995-01-01", to="2023-12-31", auto.assign=FALSE)
+  }, error = function(e) return(NULL))
+})
+names(market_data_list) <- all_tickers
+
+# --- STAP 2: INITIALISATIE LOOP ---
+results_list <- list()
+counter <- 1
+
+# --- STAP 3: DE SYSTEMATISCHE LOOP ---
+for(j in 1:nrow(Bank_Mapping)) {
+  
+  current_bank   <- Bank_Mapping$Ticker[j]
+  current_index  <- Bank_Mapping$Index_Ticker[j]
+  relevant_cb    <- Bank_Mapping$CentralBank[j]
+  relevant_year  <- Bank_Mapping$year[j]
+  
+  message(paste0("--- ANALYSE: ", current_bank, " (", relevant_year, ") ---"))
+  
+  # Check of we data hebben voor zowel bank als index
+  if (is.null(market_data_list[[current_bank]]) || is.null(market_data_list[[current_index]])) {
+    message("Skip: Data ontbreekt voor bank of index.")
+    next
+  }
+  
+  # Haal returns op uit onze cache
+  b_data <- market_data_list[[current_bank]]
+  i_data <- market_data_list[[current_index]]
+  
+  # Bereken log-returns op de volledige set
+  b_rets <- diff(log(Ad(na.locf(b_data))))
+  i_rets <- diff(log(Ad(na.locf(i_data))))
+  
+  returns_combined <- merge(b_rets, i_rets, all = FALSE)
+  colnames(returns_combined) <- c("R_bank", "R_market")
+  returns_df <- data.frame(Date = as.Date(index(returns_combined)), coredata(returns_combined))
+  
+  # Filter speeches: MOET van de juiste CB zijn EN in het juiste jaar vallen
+  relevant_speeches <- speeches_subset %>%
+    filter(CentralBank == relevant_cb, 
+           lubridate::year(Date_Clean) == relevant_year)
+  
+  if(nrow(relevant_speeches) == 0) next
+  
+  # Loop door de speeches voor deze specifieke bank/jaar combinatie
+  for(i in 1:nrow(relevant_speeches)) {
+    event_date <- relevant_speeches$Date_Clean[i]
+    
+    # Estimation Window: [-250, -30]
+    est_df <- returns_df %>% 
+      filter(Date >= (event_date - 250) & Date <= (event_date - 30))
+    
+    # Event Window: [0, +2] -> we pakken de eerste 3 beschikbare handelsdagen
+    ev_df <- returns_df %>% 
+      filter(Date >= event_date & Date <= (event_date + 10)) %>%
+      arrange(Date) %>% 
+      slice(1:3) 
+    
+    # Kwaliteitscheck: hebben we genoeg data voor een betrouwbare bèta?
+    if(nrow(est_df) >= 150 & nrow(ev_df) == 3) {
+      
+      model <- lm(R_bank ~ R_market, data = est_df)
+      
+      # Bereken Abnormal Returns
+      ev_df$AR <- ev_df$R_bank - predict(model, newdata = ev_df)
+      
+      # Sla alles op inclusief je sentiment scores en bank controls uit Bank_Mapping
+      results_list[[counter]] <- data.frame(
+        Ticker       = current_bank,
+        CentralBank  = relevant_cb,
+        EventDate    = event_date,
+        Year         = relevant_year,
+        CAR          = sum(ev_df$AR),
+        Tightness    = relevant_speeches$Tightness[i],
+        Regulation   = relevant_speeches$Regulation[i],
+        Supervision  = relevant_speeches$Supervision[i],
+        ROA          = Bank_Mapping$`ROA (%)`[j],
+        TotalAssets  = Bank_Mapping$`total assets`[j],
+        Equity       = Bank_Mapping$`total equity`[j]
+      )
+      counter <- counter + 1
+    }
+  }
+}
+
+# --- STAP 4: RESULTAAT ---
+if(length(results_list) > 0) {
+  final_dataset <- bind_rows(results_list)
+  message("Klaar! Dataset aangemaakt met ", nrow(final_dataset), " observaties.")
+} else {
+  message("Geen resultaten gevonden. Check je CentralBank namen.")
+}
+

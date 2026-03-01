@@ -82,6 +82,9 @@ speeches_subset <- speeches_subset[
 View(speeches_subset)
 
 
+Bank_Mapping <- read_excel("data/Bank_Year_CB_Data.xlsx")
+View(Bank_Year_CB_Data)
+
 
 Crisis <- read_excel("data/Crisis.xlsx")
 View(Crisis)

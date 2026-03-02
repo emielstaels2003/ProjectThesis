@@ -1,15 +1,24 @@
-#de functie assign_trichotomous_score definiëren omdat we dit nodig zullen hebben om in groepen te verdelen
-assign_trichotomous_score <- function(raw_vector) {
-  final_scores <- rep(0, length(raw_vector)) 
-  positive_indices <- which(raw_vector > 0)
-  positive_values  <- raw_vector[positive_indices]
+#zero inflated intensity for reg and sup bin making
+
+assign_zero_inflated_intensity <- function(x) {
   
-  if(length(positive_values) > 0) {
-    bins <- ntile(positive_values, 3)
-    final_scores[positive_indices] <- bins - 2
+  scores <- rep(0, length(x))   # default = 0 (no mention)
+  
+  positive_idx <- which(x > 0)
+  
+  if(length(positive_idx) > 0) {
+    
+    positive_values <- x[positive_idx]
+    
+    # split positive speeches at median
+    threshold <- median(positive_values, na.rm = TRUE)
+    
+    scores[positive_idx] <- ifelse(positive_values <= threshold, 1, 2)
   }
-  return(final_scores)
+  
+  return(scores)
 }
+
 #Definieer de verfijnde trefwoordenlijsten
 # Voor Tightness gebruiken we de Hawkish (+) en Dovish (-) verdeling
 hawkish_terms <- "\\b(increase|raise|higher|tightening|hawkish|restrictive|upside risk|tapering|hike|above target)\\b"
@@ -41,12 +50,11 @@ speeches_subset <- speeches_subset %>%
     Tightness = (raw_T_sentiment - mean(raw_T_sentiment, na.rm=TRUE)) / sd(raw_T_sentiment, na.rm=TRUE)
   )
 
-#Voor Regulation en Supervision behouden we de -1, 0, 1 intervallen (robuustheid)
-# (Gebruik de 'assign_trichotomous_score' functie die je al in je script had staan)
+# (Gebruik de 'assign_zero_inflated_intensity' functie die je al in je script had staan)
 speeches_subset <- speeches_subset %>%
   mutate(
-    Regulation  = assign_trichotomous_score(raw_R),
-    Supervision = assign_trichotomous_score(raw_S)
+    Regulation  = assign_zero_inflated_intensity(raw_R),
+    Supervision = assign_zero_inflated_intensity(raw_S)
   )
 #Controleer het resultaat
 print("Samenvatting Tightness (Z-score):")
@@ -55,7 +63,7 @@ print("Verdeling Regulation & Supervision:")
 table(speeches_subset$Regulation)
 table(speeches_subset$Supervision)
 
-
+View(speeches_subset)
 
 
 

@@ -49,12 +49,12 @@ names(market_data_list) <- all_tickers
 
 # TEST VOOR STOCK PRICE DATA: GRAFIEK MAKEN VAN STOCK PRICE
 
-getSymbols("KSA", from = "2000-01-01", to = Sys.Date())
-chartSeries(KSA,
+getSymbols("^AXJO", from = "1997-01-01", to = Sys.Date())
+chartSeries(AXJO,
             type = "line",             # lijnplot
-            subset = "2000::2025",     # periode
+            subset = "1997::2025",     # periode
             theme = chartTheme("white"), 
-            name = "KSA (Adjusted Close Price)",
+            name = "Staels werkgever (Adjusted Close Price)",
             TA = NULL)                 # Geen extra indicatoren
 rm(KSA)
 

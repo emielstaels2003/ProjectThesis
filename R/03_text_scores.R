@@ -1,5 +1,3 @@
-#saveRDS(speeches_scored, file.path(PATH_PROCESSED, "speeches_scored.rds"))
-
 #de functie assign_trichotomous_score definiëren omdat we dit nodig zullen hebben om in groepen te verdelen
 assign_trichotomous_score <- function(raw_vector) {
   final_scores <- rep(0, length(raw_vector)) 

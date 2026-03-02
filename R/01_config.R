@@ -40,16 +40,53 @@ market_indices <- c(
   "XU100.IS",   # Central Bank of Turkey
   "^J203.JO"    # South African Reserve Bank
 )
+# DE DATASET SPEECHES KLEINER MAKEN DOOR ENKEL DE G20 TE SELECTEREN 
 
+
+target_banks <- c(
+  "European Central Bank",
+  "Board of Governors of the Federal Reserve", 
+  "Reserve Bank of Australia",
+  "Bank of Mexico",
+  "Bank of Canada",
+  "Bank of Japan",
+  "Bank of England",
+  "Central Bank of Argentina",
+  "Central Bank of Brazil",
+  "People's Bank of China",
+  "Reserve Bank of India",
+  "Bank Indonesia",
+  "Bank of Korea",
+  "Bank of Russia",
+  "Saoedi Central Bank",
+  "Central Bank of the Republic of Turkey",
+  "South African Reserve Bank",
+  "Swiss National Bank "
+)
+
+tickers <- c(
+  "BNP.PA", "GLE.PA", "ACA.PA", "DBK.DE", "CBK.DE", "SAN.MC", "BBVA.MC", 
+  "UCG.MI", "INGA.AS", "NDA-FI.HE", "JPM", "BAC", "C", "GS", "MS", "WFC", 
+  "BK", "STT", "NTRS", "COF", "PNC", "TFC", "USB", "SCHW", "ALLY", "AXP", 
+  "CFG", "FITB", "FCNCA", "HBAN", "KEY", "MTB", "RF", "SYF", 
+  "ANZ.AX", "CBA.AX", "NAB.AX", "WBC.AX", "RY.TO", "TD.TO", "BMO.TO", 
+  "BNS.TO", "CM.TO", "NA.TO", "8306.T", "8316.T", "8411.T", "8604.T", 
+  "HSBA.L", "BARC.L", "STAN.L", "NWG.L", "LLOY.L", "GGAL.BA", "BMA.BA", 
+  "BPAT.BA", "BBAR.BA", "ITUB4.SA", "BBDC4.SA", "BBAS3.SA", "SANB11.SA", 
+  "601398.SS", "601988.SS", "601288.SS", "601939.SS", "601328.SS", 
+  "600036.SS", "601166.SS", "601998.SS", "600000.SS", "601658.SS", 
+  "SBIN.NS", "HDFCBANK.NS", "ICICIBANK.NS", "BMRI.JK", "BBRI.JK", 
+  "BBCA.JK", "BBNI.JK", "BBTN.JK", "024110.KS", "SBER.ME", "VTBR.ME", 
+  "CBOM.ME", "1180.SR", "1120.SR", "1010.SR", 
+  "1060.SR", "1080.SR", "SBK.JO", "ABG.JO", "NED.JO", "CPI.JO", "FSR.JO", 
+  "GFNORTEO.MX", "GFINBURO.MX", "AKBNK.IS", "GARAN.IS", 
+  "ISCTR.IS", "HALKB.IS", "VAKBN.IS", "UBSG.SW"
+)
+aantal <- length(tickers)
+# Toon het resultaat in de console
+print(paste("De lijst bevat", aantal, "tickers."))
 
 # Global settings
 EVENT_WINDOW <- c(-1, 1)      # trading days
 EST_WINDOW   <- c(-250, -30)  # trading days
-SEED <- 123
 
-set.seed(SEED)
-
-# Paths
-PATH_RAW <- "data"
-PATH_PROCESSED <- "data"
-PATH_OUTPUTS <- "outputs"

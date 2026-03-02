@@ -1,9 +1,9 @@
 speeches <- readRDS("~/ProjectThesis/data/CBS_dataset_v1.0.rds")
 
-#cb_counts <- table(speeches$CentralBank)
-#cb_matrix <- cbind(CentralBank = names(cb_counts),
-#                   Observations = as.numeric(cb_counts))
-#cb_matrix
+cb_counts <- table(speeches$CentralBank)
+cb_matrix <- cbind(CentralBank = names(cb_counts),
+                  Observations = as.numeric(cb_counts))
+cb_matrix
 
 # Filter de speeches_cleaned dataset
 # De %in% operator kijkt of de waarde in CentralBank voorkomt in onze lijst
@@ -24,7 +24,6 @@ speeches_subset <- speeches_subset[
 
 Bank_Mapping <- read_excel("data/Bank_Year_CB_Data.xlsx")
 #View(Bank_Mapping)
-
 
 Crisis <- read_excel("data/Crisis.xlsx")
 #View(Crisis)

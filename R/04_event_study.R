@@ -1,6 +1,5 @@
 
 colnames(Bank_Mapping)
-colnames(relevant_speeches)
 # --- STAP 2 (start loop): DE ESM LOOP MET EXTRA FOUTCONTROLE ---
 results_list <- list()
 counter <- 1
@@ -77,3 +76,4 @@ for(j in 1:nrow(Bank_Mapping)) {
 
 final_esm_data <- bind_rows(results_list)
 View(final_esm_data)
+

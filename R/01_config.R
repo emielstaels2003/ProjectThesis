@@ -58,10 +58,10 @@ target_banks <- c(
   "Bank Indonesia",
   "Bank of Korea",
   "Bank of Russia",
-  "Saoedi Central Bank",
+  "Saudi Central Bank",
   "Central Bank of the Republic of Turkey",
   "South African Reserve Bank",
-  "Swiss National Bank "
+  "Swiss National Bank"
 )
 
 tickers <- c(

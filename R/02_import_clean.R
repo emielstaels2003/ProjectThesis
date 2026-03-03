@@ -25,8 +25,8 @@ speeches_subset <- speeches_subset[
 Bank_Mapping <- read_excel("data/Bank_Year_CB_Data.xlsx")
 #View(Bank_Mapping)
 
-Crisis <- read_excel("data/Crisis.xlsx")
-#View(Crisis)
+Crisis <- read_excel("data/CRISISFILE.xlsx")
+View(Crisis)
 
 # --- STAP 0: DATUM & KOLOMNAAM REPARATIE ---
 # We zorgen dat de kolom altijd 'Date_Clean' heet om verwarring te voorkomen

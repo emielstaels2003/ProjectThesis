@@ -1,62 +1,120 @@
 final_esm_data <- final_esm_data %>%
   mutate(
+    # Variabelen
     ROA = as.numeric(as.character(ROA)),
     TotalAssets = as.numeric(as.character(TotalAssets)),
-    Regulation = as.factor(Regulation),   # Dit moet wel een categorie blijven
-    Supervision = as.factor(Supervision)  # Dit ook
+    TotalEquity = as.numeric(as.character(TotalEquity)),
+    CapProxy = as.numeric(as.character(CapProxy)),
+    InterbankRatio = as.numeric(as.character(InterbankRatio)),
+    # Categorieën (factoren laten)
+    Regulation = as.factor(Regulation),
+    Supervision = as.factor(Supervision)
   )
+
 
 # We voegen 'Ticker' toe aan de fixed effects (na de '|')
 reg_final <- feols(CAR ~ i(Regulation) + i(Supervision) + Tightness + 
-                     i(Regulation):Tightness + ROA + log(TotalAssets) | 
-                     Ticker + lubridate::year(SpeechDate), 
+                        i(Regulation):Tightness + 
+                        i(Supervision):Tightness +
+                        ROA + log(TotalAssets) + TotalEquity + 
+                        CapProxy + InterbankRatio | 
+                        Ticker + lubridate::year(SpeechDate),
+                      cluster = ~CentralBank,
+                      data = final_esm_data)
+summary(reg_final)
+
+#enorm veel observaies worden verwijderd, de InterbankRatio is de oorzaak hiervan dus we halen die variabele eruit
+reg_final2 <- feols(CAR ~ i(Regulation) + i(Supervision) + Tightness + 
+                     i(Regulation):Tightness +
+                     i(Supervision):Tightness +
+                     ROA + log(TotalAssets) + TotalEquity + CapProxy | 
+                     Ticker + lubridate::year(SpeechDate),
                    cluster = ~CentralBank,
                    data = final_esm_data)
+summary(reg_final2)
+# OBSERVATIE1
+# Regulation2 significant: Wanneer centrale banken intensief communiceren over nieuwe regelgeving (niveau 2),
+# reageert de markt consistent positief. Dit suggereert dat beleggers duidelijkheid over regels prefereren boven onzekerheid, 
+# wat de "clarity" hypothese uit de literatuur ondersteunt.
 
-summary(reg_final)
+# OBSERVATIE2
+# CapProxy significant: De negatieve coëfficiënt is heel interessant. 
+# Het suggereert dat banken met een hogere kapitaalratio juist een 
+# kleinere (minder positieve) koersreactie hebben op regulatie-speeches. 
+# Logisch: zij zijn al veilig en hebben minder baat bij nieuwe stabiliteitsregels dan banken die er zwakker voorstaan.
+
+# 3. Zorg dat je SpeechDate in final_esm_data ook echt een 'Date' type is
+final_esm_data$SpeechDate <- as.Date(final_esm_data$SpeechDate)
+# Voeg de VIX kolom toe aan de dataset
+final_esm_data <- final_esm_data %>%
+  left_join(vix_df, by = "SpeechDate") %>%
+  arrange(SpeechDate) %>%
+  # Vul ontbrekende waarden (weekenden) in met de laatst bekende koers
+  fill(VIX_Level, .direction = "down") 
+
+# VIX toevoegen
+reg_final3 <- feols(CAR ~ i(Regulation) + i(Supervision) + Tightness + 
+                      i(Regulation):Tightness +
+                      i(Supervision):Tightness +
+                      ROA + log(TotalAssets) + TotalEquity + CapProxy + VIX_Level | 
+                      Ticker + lubridate::year(SpeechDate),
+                    cluster = ~CentralBank,
+                    data = final_esm_data)
+summary(reg_final3)
 
 # Filter exact op de naam in jouw dataset
 us_data <- final_esm_data %>% 
   filter(CentralBank == "Board of Governors of the Federal Reserve")
-print(paste("Aantal observaties voor de Fed:", nrow(us_data)))
 
 reg_us <- feols(CAR ~ i(Regulation) + i(Supervision) + Tightness + 
-                   i(Regulation):Tightness + ROA + log(TotalAssets) | 
-                   Ticker + lubridate::year(SpeechDate), 
+                  i(Regulation):Tightness +
+                  i(Supervision):Tightness +
+                  ROA + log(TotalAssets) + TotalEquity + CapProxy + VIX_Level | 
+                  Ticker + lubridate::year(SpeechDate),
                  cluster = ~Ticker, 
                  data = us_data)
-
-# 3. Toon de resultaten
 summary(reg_us)
+# OBSERVATIE: zowel regulation1 als regulation2 zijn significant maar in tegengestelde richting
 
-sort(unique(final_esm_data$CentralBank))
+eu_data <- final_esm_data %>% 
+  filter(CentralBank == "European Central Bank")
 
-# 4. BONUS: Zet de Wereld-resultaten en de VS-resultaten naast elkaar
-# Zo zie je direct het verschil in de sterretjes
-etable(reg_final, reg_usa, 
-       headers = c("Wereldwijd", "Verenigde Staten"),
-       tex = FALSE)
+reg_eu <- feols(CAR ~ i(Regulation) + i(Supervision) + Tightness + 
+                  i(Regulation):Tightness +
+                  i(Supervision):Tightness +
+                  ROA + log(TotalAssets) + TotalEquity + CapProxy | 
+                  Ticker + lubridate::year(SpeechDate),
+                cluster = ~Ticker, 
+                data = eu_data)
+summary(reg_eu)
 
-
-# 1. Tel het aantal observaties met de exacte naam (gekopieerd van jouw bericht)
-exact_fed_count <- sum(final_esm_data$CentralBank == "Board of Governors of the Federal Reserve", na.rm = TRUE)
-
-# 2. Zoek naar namen die "Federal Reserve" bevatten (voor het geval er spaties omheen staan)
-fuzzy_fed_count <- sum(grepl("Federal Reserve", final_esm_data$CentralBank, ignore.case = TRUE))
-
-# 3. Toon de resultaten
-print(paste("Aantal met de exacte naam:", exact_fed_count))
-print(paste("Aantal met 'fuzzy' zoekopdracht:", fuzzy_fed_count))
-
-# 4. Als er een verschil is, laat dit dan de exacte spelling zien die R ziet
-if (fuzzy_fed_count > exact_fed_count) {
-  message("Let op: er zijn meer matches gevonden met de zoekopdracht. Hier is de spelling in de data:")
-  unieke_namen <- unique(final_esm_data$CentralBank[grepl("Federal Reserve", final_esm_data$CentralBank, ignore.case = TRUE)])
-  # We zetten er aanhalingstekens omheen om spaties zichtbaar te maken
-  print(paste0("'", unieke_namen, "'"))
-}
+eng_data <- final_esm_data %>% 
+  filter(CentralBank == "Bank of England")
+reg_eng <- feols(CAR ~ i(Regulation) + i(Supervision) + Tightness + 
+                      i(Regulation):Tightness +
+                      i(Supervision):Tightness +
+                      ROA + log(TotalAssets) + TotalEquity + CapProxy | 
+                      Ticker + lubridate::year(SpeechDate),
+                    cluster = ~Ticker,
+                    data = eng_data)
+summary(reg_eng)
 
 
+# Gebruik het modelplot pakket (onderdeel van modelsummary)
+# Maak een lijst van je modellen
+modellen <- list(
+  "Federal Reserve (USA)" = reg_us,
+  "European Central Bank (EU)" = reg_eu
+)
+
+# Plot de coëfficiënten van Regulation en Supervision
+modelplot(modellen, coef_omit = "Intercept|ROA|Total|Cap|Interbank") +
+  geom_vline(xintercept = 0, linetype = "dotted", color = "red") +
+  labs(title = "Vergelijking Impact: Fed vs. ECB",
+       subtitle = "Effect van Centrale Bank communicatie op Bank CARs",
+       x = "Coëfficiënt (Impact op rendement)",
+       y = "Variabele") +
+  theme_minimal()
 
 
 # --- GRAFIEK 1: Verdeling van de CARs ---
@@ -102,10 +160,4 @@ ggplot(reg_plot_data, aes(x = estimate, y = term)) +
        x = "Geschat effect (Estimate)",
        y = "Variabele") +
   theme_minimal()
-
-
-
-
-
-
 

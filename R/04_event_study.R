@@ -40,11 +40,11 @@ for(j in 1:nrow(Bank_Mapping)) {
     if(is.na(t0_idx) || t0_idx <= 251 || t0_idx >= (nrow(returns_df) - 1)) next
     
     # --- WINDOWS DEFINIËREN ---
-    # Estimation Window: [-250, -30] relatief t.o.v. t0_idx
-    est_df <- returns_df[(t0_idx - 250):(t0_idx - 30), ]
+    # Estimation Window: relatief t.o.v. t0_idx
+    est_df <- returns_df[(t0_idx + EST_WINDOW_START):(t0_idx + EST_WINDOW_EINDE), ]
     
-    # Event Window: [-1, +1] relatief t.o.v. t0_idx
-    ev_df <- returns_df[(t0_idx - 1):(t0_idx + 1), ]
+    # Event Window: relatief t.o.v. t0_idx
+    ev_df <- returns_df[(t0_idx + EVENT_WINDOW_START):(t0_idx + EVENT_WINDOW_EINDE), ]
     
     # --- BEREKENING ---
     # Extra check op oneindige of ontbrekende waarden in de window
@@ -58,15 +58,18 @@ for(j in 1:nrow(Bank_Mapping)) {
         ev_df$AR <- ev_df$R_bank - predict(fit, newdata = ev_df)
         
         results_list[[counter]] <- data.frame(
-          Ticker       = curr_bank,
-          CentralBank  = curr_cb,
-          SpeechDate   = t0,
-          CAR          = sum(ev_df$AR, na.rm = TRUE),
-          Tightness    = relevant_speeches$Tightness[i],
-          Regulation   = relevant_speeches$Regulation[i],
-          Supervision  = relevant_speeches$Supervision[i],
-          ROA          = Bank_Mapping$`ROA (%)`[j],
-          TotalAssets  = Bank_Mapping$`total assets`[j]
+          Ticker          = curr_bank,
+          CentralBank     = curr_cb,
+          SpeechDate      = t0,
+          CAR             = sum(ev_df$AR, na.rm = TRUE),
+          Tightness       = relevant_speeches$Tightness[i],
+          Regulation      = relevant_speeches$Regulation[i],
+          Supervision     = relevant_speeches$Supervision[i],
+          ROA             = Bank_Mapping$`ROA (%)`[j],
+          TotalAssets     = Bank_Mapping$`total assets`[j],
+          TotalEquity     = Bank_Mapping$`total equity`[j],
+          CapProxy        = Bank_Mapping$`Capitalization proxy`[j],
+          InterbankRatio  = Bank_Mapping$`Interbank ratio`[j]
         )
         counter <- counter + 1
       }

@@ -1,6 +1,7 @@
 #keep this file short, nothing that reads data
 
 # Packages
+install.packages("modelsummary")
 install.packages("quantmod")
 if (!require("fixest")) install.packages("fixest")
 
@@ -18,7 +19,7 @@ library(quantmod)
 library(lubridate)
 library(fixest)
 library(broom)
-
+#library(modelsummary)
 
 market_indices <- c(
   "^GSPC",      # US Federal Reserve
@@ -87,6 +88,8 @@ aantal <- length(tickers)
 print(paste("De lijst bevat", aantal, "tickers."))
 
 # Global settings
-EVENT_WINDOW <- c(-1, 1)      # trading days
-EST_WINDOW   <- c(-250, -30)  # trading days
+EVENT_WINDOW_START <- -1       # trading days
+EVENT_WINDOW_EINDE <- 1        # trading days
+EST_WINDOW_START<- -250        # trading days
+EST_WINDOW_EINDE <- -30        # trading days     
 

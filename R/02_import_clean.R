@@ -46,14 +46,21 @@ market_data_list <- lapply(all_tickers, function(x) {
 })
 names(market_data_list) <- all_tickers
 
+#VIX koers inlezen
+getSymbols("^VIX", src = "yahoo", from = "1997-01-01")
+vix_df <- data.frame(
+  SpeechDate = index(VIX),
+  VIX_Level = as.numeric(Ad(VIX))
+)
+
 # TEST VOOR STOCK PRICE DATA: GRAFIEK MAKEN VAN STOCK PRICE
 
-getSymbols("^AXJO", from = "1997-01-01", to = Sys.Date())
-chartSeries(AXJO,
+getSymbols("^STOXX50E", from = "1997-01-01", to = Sys.Date())
+chartSeries(STOXX50E,
             type = "line",             # lijnplot
             subset = "1997::2025",     # periode
             theme = chartTheme("white"), 
-            name = "Staels werkgever (Adjusted Close Price)",
+            name = "STOXX50E (Adjusted Close Price)",
             TA = NULL)                 # Geen extra indicatoren
 rm(KSA)
 

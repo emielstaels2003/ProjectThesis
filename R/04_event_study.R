@@ -52,7 +52,7 @@ for(j in 1:nrow(Bank_Mapping)) {
       
       # Probeer het model te fitten, vang fouten op
       fit <- try(lm(R_bank ~ R_market, data = est_df), silent = TRUE)
-      
+
       if(!inherits(fit, "try-error")) {
         # Bereken Abnormal Returns
         ev_df$AR <- ev_df$R_bank - predict(fit, newdata = ev_df)

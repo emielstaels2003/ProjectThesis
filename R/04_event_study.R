@@ -73,6 +73,7 @@ for(j in 1:nrow(Bank_Mapping)) {
           InterbankRatio  = Bank_Mapping$`Interbank ratio`[j]
         )
         counter <- counter + 1
+        print(counter)
       }
     }
   }

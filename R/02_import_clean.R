@@ -28,6 +28,8 @@ Bank_Mapping <- read_excel("data/Bank_Year_CB_Data.xlsx")
 Crisis <- read_excel("data/CRISISFILE.xlsx")
 View(Crisis)
 
+
+
 # --- STAP 0: DATUM & KOLOMNAAM REPARATIE ---
 # We zorgen dat de kolom altijd 'Date_Clean' heet om verwarring te voorkomen
 speeches_subset <- speeches_subset %>%

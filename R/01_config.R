@@ -3,6 +3,7 @@
 # Packages
 install.packages("modelsummary")
 install.packages("quantmod")
+install.packages("readxl")
 if (!require("fixest")) install.packages("fixest")
 
 # Libraries

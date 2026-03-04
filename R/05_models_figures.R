@@ -73,6 +73,7 @@ reg_final3 <- feols(CAR ~ i(Regulation) + i(Supervision) + Tightness +
                       Ticker + lubridate::year(SpeechDate),
                     cluster = ~CentralBank,
                     data = final_esm_data)
+
 summary(reg_final3)
 
 # Filter exact op de naam in jouw dataset

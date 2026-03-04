@@ -60,6 +60,7 @@ for(j in 1:nrow(Bank_Mapping)) {
         results_list[[counter]] <- data.frame(
           Ticker          = curr_bank,
           CentralBank     = curr_cb,
+          Index_Ticker    = curr_index,
           SpeechDate      = t0,
           CAR             = sum(ev_df$AR, na.rm = TRUE),
           Tightness       = relevant_speeches$Tightness[i],
@@ -79,4 +80,47 @@ for(j in 1:nrow(Bank_Mapping)) {
 
 final_esm_data <- bind_rows(results_list)
 View(final_esm_data)
+
+final_esm_data <- final_esm_data %>%
+  mutate(SpeechDate = as.Date(SpeechDate),
+         Index_Ticker = trimws(Index_Ticker)) %>%
+  mutate(crisis = 0L)
+
+# --- 1) Wereldwijde crises (apply to all banks within interval)
+cr_world <- Crisis %>%
+  rename(start_date = `start date`, end_date = `end date`) %>%
+  mutate(start_date = as.Date(start_date),
+         end_date   = as.Date(end_date),
+         worldwide  = toupper(trimws(worldwide))) %>%
+  filter(worldwide == "YES") %>%
+  select(start_date, end_date)
+
+final_esm_data <- final_esm_data %>%
+  mutate(crisis = ifelse(
+    crisis == 1L |
+      rowSums(sapply(1:nrow(cr_world), function(i)
+        SpeechDate >= cr_world$start_date[i] & SpeechDate <= cr_world$end_date[i]
+      )) > 0,
+    1L, crisis
+  ))
+
+# --- 2) Lokale crises (apply only if Index_Ticker matches AND within interval)
+cr_local <- Crisis %>%
+  rename(start_date = `start date`, end_date = `end date`) %>%
+  mutate(start_date = as.Date(start_date),
+         end_date   = as.Date(end_date),
+         worldwide  = toupper(trimws(worldwide))) %>%
+  filter(worldwide != "YES") %>%
+  pivot_longer(cols = c(index, index2), values_to = "Index_Ticker") %>%
+  mutate(Index_Ticker = trimws(Index_Ticker)) %>%
+  filter(!is.na(Index_Ticker), Index_Ticker != "") %>%
+  select(start_date, end_date, Index_Ticker)
+
+final_esm_data <- final_esm_data %>%
+  left_join(cr_local, by = "Index_Ticker") %>%
+  mutate(crisis = ifelse(
+    crisis == 1L | (!is.na(start_date) & SpeechDate >= start_date & SpeechDate <= end_date),
+    1L, crisis
+  )) %>%
+  select(-start_date, -end_date)
 

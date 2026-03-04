@@ -43,6 +43,19 @@ summary(reg_final2)
 # kleinere (minder positieve) koersreactie hebben op regulatie-speeches. 
 # Logisch: zij zijn al veilig en hebben minder baat bij nieuwe stabiliteitsregels dan banken die er zwakker voorstaan.
 
+reg_final3 <- feols(CAR ~ i(Regulation) + i(Supervision) + Tightness +
+    i(Regulation):Tightness +
+    i(Supervision):Tightness +
+    crisis +
+    ROA + log(TotalAssets) + TotalEquity + CapProxy |
+    Ticker + lubridate::year(SpeechDate),
+  cluster = ~CentralBank,
+  data = final_esm_data
+)
+summary(reg_final3)
+
+
+
 # 3. Zorg dat je SpeechDate in final_esm_data ook echt een 'Date' type is
 final_esm_data$SpeechDate <- as.Date(final_esm_data$SpeechDate)
 # Voeg de VIX kolom toe aan de dataset

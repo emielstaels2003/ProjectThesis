@@ -19,7 +19,7 @@ speeches_subset <- speeches_subset[
 ]
 
 # 5. Bekijk het resultaat
-#View(speeches_subset)
+View(speeches_subset)
 
 
 Bank_Mapping <- read_excel("data/Bank_Year_CB_Data.xlsx")

@@ -18,6 +18,19 @@ speeches_subset <- speeches_subset[
     speeches_subset$Date <= as.Date("2023-12-31"), 
 ]
 
+speeches$Date <- as.Date(speeches$Date)
+
+# 2. Filter de originele dataset op European Central Bank
+ecb_speeches <- speeches[speeches$CentralBank == "European Central Bank", ]
+
+# 3. Zoek de minimum datum (de oudste speech)
+eerste_datum <- min(ecb_speeches$Date, na.rm = TRUE)
+
+# Toon het resultaat
+print(eerste_datum)
+
+
+
 # 5. Bekijk het resultaat
 View(speeches_subset)
 

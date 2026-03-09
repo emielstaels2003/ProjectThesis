@@ -137,10 +137,10 @@ ggplot(final_esm_data, aes(x = CAR)) +
   geom_histogram(bins = 100, fill = "dodgerblue", color = "white", alpha = 0.7) +
   geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
   coord_cartesian(xlim = c(-0.05, 0.05)) + # We zoomen in op de relevante range
-  labs(title = "Verdeling van Cumulative Abnormal Returns (CAR [-1, 1])",
-       subtitle = "Rode lijn is het nulpunt (geen effect)",
+  labs(title = "Distribution of Cumulative Abnormal Returns (CAR [-1, 1])",
+       subtitle = "The dashed red line indicates the zero-effect baseline",
        x = "CAR (0.01 = 1%)",
-       y = "Aantal observaties") +
+       y = "Frequency (Number of Observations)") +
   theme_minimal()
 
 # --- GRAFIEK 2: CAR per Regulation Groep (Boxplot) ---

@@ -20,6 +20,7 @@ library(quantmod)
 library(lubridate)
 library(fixest)
 library(broom)
+library(gt)
 #library(modelsummary)
 
 market_indices <- c(

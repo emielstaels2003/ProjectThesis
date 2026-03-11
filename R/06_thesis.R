@@ -56,3 +56,46 @@ final_table <- appendix_table_data %>%
 
 # Toon het resultaat
 final_table
+
+
+
+# 1. Installeer en laad de benodigde extra bibliotheken
+if(!require(flextable)) install.packages("flextable")
+if(!require(officer)) install.packages("officer")
+if(!require(webshot2)) install.packages("webshot2") # Nodig om een foto te maken van gt
+library(flextable)
+library(officer)
+
+library(webshot2)
+
+# 2. De data omzetten naar een Word-tabel (flextable)
+word_export <- flextable(appendix_table_data) %>%
+  # Kolomnamen netjes maken
+  set_header_labels(
+    Speech_Count = "Speeches",
+    CentralBank = "Central Bank",
+    Total_Banks = "Number of Banks",
+    Bank_List = "Included Institutions"
+  ) %>%
+  # Opmaak: Dikke koppen en grijze achtergrond (zoals in je gt-code)
+  bold(part = "header") %>%
+  bg(bg = "#F9F9F9", part = "header") %>%
+  # Rijen dikker maken (padding)
+  padding(padding = 10, part = "all") %>%
+  # Zorg dat de tekst in de kolommen mooi doorloopt (wrapping)
+  # We stellen de breedte in inches in (totaal ongeveer 6.5 tot 7.0 voor A4)
+  width(j = "Speech_Count", width = 0.8) %>%
+  width(j = "CentralBank", width = 1.2) %>%
+  width(j = "Total_Banks", width = 1.0) %>%
+  width(j = "Bank_List", width = 4.0) %>%
+  # Tekst uitlijnen (midden voor de cijfers)
+  align(j = c("Speech_Count", "Total_Banks"), align = "center", part = "all") %>%
+  # Standaard font voor scripties
+  font(fontname = "Times New Roman", part = "all")
+
+# 3. OPSLAAN IN JE WERKMAPP
+# Dit bestand verschijnt direct in je 'Files' paneel rechtsonder in RStudio
+save_as_docx(word_export, path = "Appendix_Tabel_Banken.docx")
+
+# Bevestiging in je console
+print("KLAAR! Het bestand 'Appendix_Tabel_Banken.docx' staat nu in je werkmap.")

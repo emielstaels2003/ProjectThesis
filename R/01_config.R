@@ -82,7 +82,7 @@ tickers <- c(
   "BBCA.JK", "BBNI.JK", "BBTN.JK", "024110.KS", "105560.KS", "055550.KS", "086790.KS", "316140.KS", "SBER.ME", "VTBR.ME", 
   "CBOM.ME", "1180.SR", "1120.SR", "1010.SR", 
   "1060.SR", "1080.SR", "SBK.JO", "ABG.JO", "NED.JO", "CPI.JO", "FSR.JO", 
-  "GFNORTEO.MX", "SANMEXB.MX", "AKBNK.IS", "GARAN.IS", 
+  "GFNORTEO.MX", "BINBURSAO.MX", "SANMEXB.MX", "AKBNK.IS", "GARAN.IS", 
   "ISCTR.IS", "HALKB.IS", "VAKBN.IS", "UBSG.SW" 
 )
 aantal <- length(tickers)

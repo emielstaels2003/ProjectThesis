@@ -1,6 +1,8 @@
 #keep this file short, nothing that reads data
 
 # Packages
+install.packages("gt")
+install.packages("SnowballC")
 install.packages("modelsummary")
 install.packages("quantmod")
 install.packages("readxl")
@@ -8,6 +10,7 @@ if (!require("fixest")) install.packages("fixest")
 
 # Libraries
 library(dplyr)
+library(gt)
 library(lubridate)
 library(ggplot2)
 library(readr)
@@ -22,6 +25,7 @@ library(fixest)
 library(broom)
 library(gt)
 library(modelsummary)
+library(SnowballC)
 
 market_indices <- c(
   "^GSPC",      # US Federal Reserve

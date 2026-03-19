@@ -21,11 +21,11 @@ assign_zero_inflated_intensity <- function(x) {
 
 #Definieer de verfijnde trefwoordenlijsten
 # Voor Tightness gebruiken we de Hawkish (+) en Dovish (-) verdeling
-hawkish_terms <- "\\b(increase|raise|higher|tightening|hawkish|restrictive|upside risk|tapering|hike|above target)\\b"
-dovish_terms  <- "\\b(decrease|lower|cut|easing|dovish|accommodative|stimulus|downside risk|supportive|below target)\\b"
+hawkish_terms <- "\\b(restrict|tighten|overheat|inflationary pressures|quantitative tightening|anchoring inflation|vigilance)\\b"
+dovish_terms  <- "\\b(cut|accommodative|slowdown|stimulus|slack|monetary easing|quantitative easing|easing|weakness)\\b"
 #Voor Regulation en Supervision blijven we bij de 'intensiteit' trefwoorden
-reg_terms <- "\\b(basel|solvency|regulatory framework|capital requirement|leverage ratio|risk-weighting|own funds|capital buffer|liquidity ratio|lcr|nsfr|liquidity coverage|macroprudential|systemic risk|crr|crd)\\b"
-sup_terms <- "\\b(oversight|monitoring|inspection|examination|enforcement|sanctions|remedial action|early intervention|stress test|srep|audit|supervisory review|on-site|reporting obligations|disclosure|compliance)\\b"
+reg_terms <- "\\b(capital|basel|compliance|requirements|framework|standards|regulation|regulatory|rules|buffer)\\b"
+sup_terms <- "\\b(supervision|stability|effective|macro|supervisory|prudential|compliance|inspection|surveillance)\\b"
 #Bereken de scores
 speeches_subset <- speeches_subset %>%
   mutate(

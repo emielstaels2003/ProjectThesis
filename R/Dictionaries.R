@@ -37,22 +37,6 @@ required_packages <- c(
 to_install <- required_packages[!required_packages %in% installed.packages()[, "Package"]]
 if (length(to_install) > 0) install.packages(to_install)
 
-library(tidyverse)
-library(tidytext)
-library(SnowballC)
-library(stopwords)
-
-# ---------------------------
-# 2. CHECK DATA
-# ---------------------------
-if (!exists("speeches_subset")) {
-  stop("Object `speeches_subset` not found.")
-}
-
-if (!"text" %in% names(speeches_subset)) {
-  stop("Column `text` not found in `speeches_subset`.")
-}
-
 # Create a document id
 speeches_subset <- speeches_subset %>%
   mutate(doc_id = row_number()) %>%

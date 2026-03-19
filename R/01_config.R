@@ -21,7 +21,7 @@ library(lubridate)
 library(fixest)
 library(broom)
 library(gt)
-#library(modelsummary)
+library(modelsummary)
 
 market_indices <- c(
   "^GSPC",      # US Federal Reserve

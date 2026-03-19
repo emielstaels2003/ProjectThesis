@@ -58,29 +58,87 @@ speeches_subset <- speeches_subset %>%
   mutate(doc_id = row_number()) %>%
   filter(!is.na(text))
 
-# ---------------------------
-# 3. SEED WORDS
+#---------------------------
+# 3. SEED WORDS1
 # These are just starting points, not the final dictionary
 # ---------------------------
-seed_hawkish <- c(
-  "tightening", "restrictive", "hike", "higher", "inflation",
-  "persistent", "pressure", "vigilance", "anchor", "overheating"
-)
+#seed_hawkish <- c(
+#  "tightening", "restrictive", "hike", "higher", "inflation",
+#  "persistent", "pressure", "vigilance", "anchor", "overheating"
+#)
 
-seed_dovish <- c(
-  "easing", "accommodative", "support", "stimulus", "lower",
-  "cut", "slowdown", "weakness", "recovery", "unemployment"
-)
+#seed_dovish <- c(
+#  "easing", "accommodative", "support", "stimulus", "lower",
+#  "cut", "slowdown", "weakness", "recovery", "unemployment"
+#)
 
-seed_supervision <- c(
-  "supervision", "supervisory", "oversight", "monitoring", "prudential",
-  "compliance", "inspection", "assessment", "review", "surveillance"
+#seed_supervision <- c(
+#  "supervision", "supervisory", "oversight", "monitoring", "prudential",
+#  "compliance", "inspection", "assessment", "review", "surveillance"
+#)
+
+#seed_regulation <- c(
+#  "regulation", "regulatory", "rules", "standards", "framework",
+#  "requirements", "capital", "liquidity", "buffer", "solvency"
+#)
+
+#table(doc_topics_all$group)
+#other target 
+#4863  42125 
+
+# ---------------------------
+# 3. SEED WORDS2
+# These are just starting points, not the final dictionary
+# ---------------------------
+#seed_hawkish <- c(
+#  "tightening", "restrictive", "pressure", "vigilance", "overheating")
+#
+#seed_dovish <- c(
+#  "easing", "support", "stimulus", "slowdown", "weakness", "recovery")
+#
+#seed_supervision <- c(
+#  "supervision", "supervisory", "oversight", "monitoring", "prudential",
+#  "compliance", "inspection", "assessment", "surveillance"
+#)
+
+#seed_regulation <- c(
+#  "banking supervision", "bank supervision", "glass-steagall", "tarp", 
+#  "thrift supervision", "dodd-frank", "financial reform", 
+#  "commodity futures trading commission", "cftc", 
+#  "house financial services committee", "basel", "capital requirement", 
+#  "volcker rule", "bank stress test", 
+#  "securities and exchange commission", "sec", 
+# "deposit insurance", "fdic", "fslic", "ots", "occ", "firrea")
+
+#table(doc_topics_all$group)
+#other target 
+#16758  30230 
+
+# ---------------------------
+# 3. SEED WORDS3
+# These are just starting points, not the final dictionary
+# ---------------------------
+seed_hawkish <- c("tightening", "restrictive", "pressure", "vigilance", "overheating")
+
+seed_dovish <- c("easing", "support", "stimulus", "slowdown", "weakness", "recovery")
+
+seed_supervision <- c("supervision", "supervisory", "oversight", "monitoring", "prudential",
+  "compliance", "inspection", "assessment", "surveillance"
 )
 
 seed_regulation <- c(
-  "regulation", "regulatory", "rules", "standards", "framework",
-  "requirements", "capital", "liquidity", "buffer", "solvency"
+  "banking supervision", "bank supervision", "glass-steagall", "tarp", 
+  "thrift supervision", "dodd-frank", "financial reform", 
+  "commodity futures trading commission", "cftc", 
+  "house financial services committee", "basel", "capital requirement", 
+  "volcker rule", "bank stress test", 
+  "securities and exchange commission", "sec", 
+ "deposit insurance", "fdic", "fslic", "ots", "occ", "firrea"
 )
+
+#table(doc_topics_all$group)
+#other target 
+#22891  24097
 
 # Stem seeds
 seed_tbl <- tibble(
@@ -144,15 +202,17 @@ doc_token_counts <- tokens_clean %>%
 # ---------------------------
 doc_topic_hits <- tokens_clean %>%
   inner_join(seed_tbl %>% select(topic, seed_stem), by = c("stem" = "seed_stem")) %>%
-  distinct(doc_id, topic)
+  count(doc_id, topic, name = "seed_hits")
 
 doc_topics_all <- expand_grid(
   doc_id = unique(tokens_clean$doc_id),
   topic = unique(seed_tbl$topic)
 ) %>%
-  left_join(doc_topic_hits %>% mutate(in_topic = 1), by = c("doc_id", "topic")) %>%
-  mutate(in_topic = replace_na(in_topic, 0),
-         group = if_else(in_topic == 1, "target", "other"))
+  left_join(doc_topic_hits, by = c("doc_id", "topic")) %>%
+  mutate(
+    seed_hits = replace_na(seed_hits, 0),
+    group = if_else(seed_hits >= 2, "target", "other")
+  )
 
 # ---------------------------
 # 7. TF-IDF CANDIDATE EXTRACTION
@@ -297,7 +357,7 @@ preliminary_final_dictionary <- candidate_dictionary_clean %>%
   group_by(topic) %>%
   arrange(combined_rank, .by_group = TRUE) %>%
   distinct(stem, .keep_all = TRUE) %>%
-  slice_head(n = 10) %>%
+  slice_head(n = 20) %>%
   ungroup() %>%
   select(topic, stem, example_word, tf_idf, cooc_n, combined_rank)
 
@@ -350,4 +410,29 @@ cat("- dictionary_tightness_hawkish.txt\n")
 cat("- dictionary_tightness_dovish.txt\n")
 cat("- dictionary_supervision.txt\n")
 cat("- dictionary_regulation.txt\n")
+
+
+tone_counts <- tokens_clean %>%
+  group_by(doc_id) %>%
+  summarise(
+    hawkish_hits = sum(stem %in% seed_hawkish),
+    dovish_hits  = sum(stem %in% seed_dovish)
+  )
+view(tone_counts)
+sum(tone_counts$hawkish_hits)
+
+
+tone_counts <- tokens_clean %>%
+  group_by(doc_id) %>%
+  summarise(
+    hawkish_hits = sum(stem %in% tightness_hawkish_stems),
+    dovish_hits  = sum(stem %in% tightness_dovish_stems)
+  )
+
+
+
+
+
+
+
 

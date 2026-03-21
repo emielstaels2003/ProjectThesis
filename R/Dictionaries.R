@@ -1,46 +1,3 @@
-# ============================================================
-# BUILD A THESIS-READY DICTIONARY FROM CENTRAL BANK SPEECHES
-# Dataset: speeches_subset
-# Required column: text
-#
-# Topics:
-#   1) Tightness_Hawkish
-#   2) Tightness_Dovish
-#   3) Supervision
-#   4) Regulation
-#
-# What this script does:
-#   - tokenizes and stems speeches
-#   - uses small seed dictionaries
-#   - identifies speeches related to each topic
-#   - extracts candidate terms using tf-idf
-#   - extracts candidate terms using co-occurrence
-#   - combines both into candidate dictionaries
-#   - exports clean CSV files for manual review
-#   - creates a preliminary final dictionary
-#
-# IMPORTANT:
-#   The exported candidate files are what you review and defend
-#   in your thesis. The "final dictionary" is the cleaned result.
-# ============================================================
-
-# ---------------------------
-# 1. PACKAGES
-# ---------------------------
-required_packages <- c(
-  "tidyverse",
-  "tidytext",
-  "SnowballC",
-  "stopwords"
-)
-
-to_install <- required_packages[!required_packages %in% installed.packages()[, "Package"]]
-if (length(to_install) > 0) install.packages(to_install)
-
-# Create a document id
-speeches_subset <- speeches_subset %>%
-  mutate(doc_id = row_number()) %>%
-  filter(!is.na(text))
 
 #---------------------------
 # 3. SEED WORDS1
@@ -102,15 +59,12 @@ speeches_subset <- speeches_subset %>%
 # 3. SEED WORDS3
 # These are just starting points, not the final dictionary
 # ---------------------------
-seed_hawkish <- c("tightening", "restrictive", "pressure", "vigilance", "overheating")
-
-seed_dovish <- c("easing", "support", "stimulus", "slowdown", "weakness", "recovery")
-
-seed_supervision <- c("supervision", "supervisory", "oversight", "monitoring", "prudential",
+#1e iteratie
+#seed_supervision <- c("supervision", "supervisory", "oversight", "monitoring", "prudential",
   "compliance", "inspection", "assessment", "surveillance"
 )
 
-seed_regulation <- c(
+#seed_regulation <- c(
   "banking supervision", "bank supervision", "glass-steagall", "tarp", 
   "thrift supervision", "dodd-frank", "financial reform", 
   "commodity futures trading commission", "cftc", 
@@ -119,7 +73,16 @@ seed_regulation <- c(
   "securities and exchange commission", "sec", 
  "deposit insurance", "fdic", "fslic", "ots", "occ", "firrea"
 )
+#seed_supervision <- c("supervision", "supervisory", "oversight", "monitoring", "prudential",
+                      "compliance", "inspection", "assessment", "surveillance"
+)
 
+#seed_regulation <- c("capital", "basel", "requirements", "standards", "regulation",
+                     "regulatory", "rules", "buffer", "compliance"
+)
+seed_regulation <- c("capital", "basel", "requirements", "framework", "standards",
+"regulation", "regulatory", "rules", "buffer", "compliance",
+"lcr", "ccyb", "tlac", "sifis", "sibs", "ccar", "aml", "kyc")
 #table(doc_topics_all$group)
 #other target 
 #22891  24097
@@ -127,12 +90,10 @@ seed_regulation <- c(
 # Stem seeds
 seed_tbl <- tibble(
   topic = c(
-    rep("tightness_hawkish", length(seed_hawkish)),
-    rep("tightness_dovish", length(seed_dovish)),
     rep("supervision", length(seed_supervision)),
     rep("regulation", length(seed_regulation))
   ),
-  seed_word = c(seed_hawkish, seed_dovish, seed_supervision, seed_regulation)
+  seed_word = c(seed_supervision, seed_regulation)
 ) %>%
   mutate(seed_stem = wordStem(seed_word, language = "en")) %>%
   distinct(topic, seed_word, seed_stem)

@@ -32,7 +32,7 @@ print(eerste_datum)
 
 
 # 5. Bekijk het resultaat
-View(speeches_subset)
+#View(speeches_subset)
 
 
 Bank_Mapping <- read_excel("data/Bank_Year_CB_Data.xlsx")
@@ -40,7 +40,7 @@ Bank_Mapping <- read_excel("data/Bank_Year_CB_Data.xlsx")
 
 
 Crisis <- read_excel("data/CRISISFILE.xlsx")
-View(Crisis)
+#View(Crisis)
 
 
 

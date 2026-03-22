@@ -24,8 +24,8 @@ assign_zero_inflated_intensity <- function(x) {
 hawkish_terms <- "\\b(restrict|tighten|overheat|inflationary pressures|quantitative tightening|anchoring inflation|vigilance)\\b"
 dovish_terms  <- "\\b(cut|accommodative|slowdown|stimulus|slack|monetary easing|quantitative easing|easing|weakness)\\b"
 #Voor Regulation en Supervision blijven we bij de 'intensiteit' trefwoorden
-reg_terms <- "\\b(capital|basel|compliance|requirements|framework|standards|regulation|regulatory|rules|buffer)\\b"
-sup_terms <- "\\b(supervision|stability|effective|macro|supervisory|prudential|compliance|inspection|surveillance)\\b"
+reg_terms <- "\\b(capital|basel|requirements|standards|regulation|regulatory|rules|buffer|compliance|lcr|ccyb|tlac|sifis|sibs|ccar|aml|kyc|bcbs|microprudential)\\b"
+sup_terms <- "\\b(supervision|supervisory|oversight|monitoring|compliance|inspection|surveillance|review|assessment|prudential)\\b"
 #Bereken de scores
 speeches_subset <- speeches_subset %>%
   mutate(

@@ -61,31 +61,42 @@
 # ---------------------------
 #1e iteratie
 #seed_supervision <- c("supervision", "supervisory", "oversight", "monitoring", "prudential",
-  "compliance", "inspection", "assessment", "surveillance"
-)
+#  "compliance", "inspection", "assessment", "surveillance"
+#)
 
 #seed_regulation <- c(
-  "banking supervision", "bank supervision", "glass-steagall", "tarp", 
-  "thrift supervision", "dodd-frank", "financial reform", 
-  "commodity futures trading commission", "cftc", 
-  "house financial services committee", "basel", "capital requirement", 
-  "volcker rule", "bank stress test", 
-  "securities and exchange commission", "sec", 
- "deposit insurance", "fdic", "fslic", "ots", "occ", "firrea"
-)
-#seed_supervision <- c("supervision", "supervisory", "oversight", "monitoring", "prudential",
-                      "compliance", "inspection", "assessment", "surveillance"
-)
+#  "banking supervision", "bank supervision", "glass-steagall", "tarp", 
+#  "thrift supervision", "dodd-frank", "financial reform", 
+#  "commodity futures trading commission", "cftc", 
+#  "house financial services committee", "basel", "capital requirement", 
+#  "volcker rule", "bank stress test", 
+#  "securities and exchange commission", "sec", 
+# "deposit insurance", "fdic", "fslic", "ots", "occ", "firrea"
+#)
+seed_supervision <- c("supervision", "supervisory", "oversight", "monitoring", "prudential",
+                      "compliance", "inspection", "assessment", "surveillance")
 
 #seed_regulation <- c("capital", "basel", "requirements", "standards", "regulation",
-                     "regulatory", "rules", "buffer", "compliance"
-)
+#                     "regulatory", "rules", "buffer", "compliance")
+
 seed_regulation <- c("capital", "basel", "requirements", "framework", "standards",
 "regulation", "regulatory", "rules", "buffer", "compliance",
 "lcr", "ccyb", "tlac", "sifis", "sibs", "ccar", "aml", "kyc")
 #table(doc_topics_all$group)
 #other target 
 #22891  24097
+
+if (!exists("speeches_subset")) {
+  stop("Object speeches_subset not found.")
+}
+
+if (!"text" %in% names(speeches_subset)) {
+  stop("Column text not found in speeches_subset.")
+}
+
+speeches_subset <- speeches_subset %>%
+  mutate(doc_id = row_number()) %>%
+  filter(!is.na(text))
 
 # Stem seeds
 seed_tbl <- tibble(

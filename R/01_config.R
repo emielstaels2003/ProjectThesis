@@ -28,6 +28,7 @@ library(modelsummary)
 library(SnowballC)
 library(tidytext)
 library(stopwords)
+library(stringr)
 
 market_indices <- c(
   "^GSPC",      # US Federal Reserve

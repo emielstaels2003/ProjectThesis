@@ -24,7 +24,7 @@ reg_final <- feols(CAR ~ i(Regulation) + i(Supervision) + Tightness +
 summary(reg_final)
 
 #enorm veel observaies worden verwijderd, de InterbankRatio is de oorzaak hiervan dus we halen die variabele eruit
-reg_final2 <- feols(CAR ~ i(Regulation) + i(Supervision) + Tightness + 
+reg_final2 <- feols(CAR ~ i(Regulation) + i(Supervision) + Tightness + Sentiment +
                      i(Regulation):Tightness +
                      i(Supervision):Tightness +
                      ROA + log(TotalAssets) + TotalEquity + CapProxy | 

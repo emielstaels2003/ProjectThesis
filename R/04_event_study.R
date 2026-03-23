@@ -66,6 +66,7 @@ for(j in 1:nrow(Bank_Mapping)) {
           Tightness       = relevant_speeches$Tightness[i],
           Regulation      = relevant_speeches$Regulation[i],
           Supervision     = relevant_speeches$Supervision[i],
+          Sentiment       = relevant_speeches$Sentiment[i],
           ROA             = Bank_Mapping$`ROA (%)`[j],
           TotalAssets     = Bank_Mapping$`total assets`[j],
           TotalEquity     = Bank_Mapping$`total equity`[j],

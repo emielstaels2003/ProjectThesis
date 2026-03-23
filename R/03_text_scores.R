@@ -24,13 +24,17 @@ assign_zero_inflated_intensity <- function(x) {
 hawkish_terms <- "\\b(restrict|tighten|overheat|inflationary pressures|quantitative tightening|anchoring inflation|vigilance)\\b"
 dovish_terms  <- "\\b(cut|accommodative|slowdown|stimulus|slack|monetary easing|quantitative easing|easing|weakness)\\b"
 #Voor Regulation en Supervision blijven we bij de 'intensiteit' trefwoorden
-reg_terms <- "\\b(capital|basel|compliance|requirements|framework|standards|regulation|regulatory|rules|buffer)\\b"
-sup_terms <- "\\b(supervision|stability|effective|macro|supervisory|prudential|compliance|inspection|surveillance)\\b"
+reg_terms <- "\\b(capital|basel|requirements|standards|regulation|regulatory|rules|buffer|compliance|lcr|ccyb|tlac|sifis|sibs|ccar|aml|kyc|bcbs|microprudential)\\b"
+sup_terms <- "\\b(supervision|supervisory|oversight|monitoring|compliance|inspection|surveillance|review|assessment|prudential)\\b"
+#Voor Sentiment
+neg_pattern <- paste0("\\b(", paste(negatieve_woorden, collapse = "|"), ")\\b")
+pos_pattern <- paste0("\\b(", paste(positieve_woorden, collapse = "|"), ")\\b")
 #Bereken de scores
 speeches_subset <- speeches_subset %>%
   mutate(
     # Voorbereiding: tekst naar kleine letters en woordenaantal
     text_low = tolower(text),
+    text_up  = toupper(text),
     word_count = str_count(text, "\\w+"),
     
     # A. TIGHTNESS: IMF Sentiment Formule (Netto Sentiment)
@@ -41,13 +45,19 @@ speeches_subset <- speeches_subset %>%
     
     # B. REGULATION & SUPERVISION: Ruwe intensiteit (zoals voorheen)
     raw_R = str_count(text_low, reg_terms) / word_count,
-    raw_S = str_count(text_low, sup_terms) / word_count
+    raw_S = str_count(text_low, sup_terms) / word_count,
+    
+    # C. SENTIMENT CONTROLE (L&M Methode)
+    lm_neg_count = str_count(text_up, neg_pattern),
+    lm_pos_count = str_count(text_up, pos_pattern),
+    raw_sentiment = (lm_pos_count - lm_neg_count) / word_count
   )
 #Omzetten naar finale variabelen
 # Voor Tightness gebruiken we de continue Z-score (nauwkeuriger voor regressie)
 speeches_subset <- speeches_subset %>%
   mutate(
-    Tightness = (raw_T_sentiment - mean(raw_T_sentiment, na.rm=TRUE)) / sd(raw_T_sentiment, na.rm=TRUE)
+    Tightness = (raw_T_sentiment - mean(raw_T_sentiment, na.rm=TRUE)) / sd(raw_T_sentiment, na.rm=TRUE),
+    Sentiment = (raw_sentiment - mean(raw_sentiment, na.rm=TRUE)) / sd(raw_sentiment, na.rm=TRUE),
   )
 
 # (Gebruik de 'assign_zero_inflated_intensity' functie die je al in je script had staan)
@@ -59,10 +69,11 @@ speeches_subset <- speeches_subset %>%
 #Controleer het resultaat
 print("Samenvatting Tightness (Z-score):")
 summary(speeches_subset$Tightness)
+print("Samenvatting Sentiment (Z-score):")
+summary(speeches_subset$Sentiment)
 print("Verdeling Regulation & Supervision:")
 table(speeches_subset$Regulation)
 table(speeches_subset$Supervision)
-
 View(speeches_subset)
 
 

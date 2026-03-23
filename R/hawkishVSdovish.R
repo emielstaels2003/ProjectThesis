@@ -1,31 +1,24 @@
-# ============================================================
-# HAWKISH VS DOVISH: CONTRASTIVE DICTIONARY EXTRACTION
-# Paste this AFTER you have created:
-#   - speeches_subset
-#   - tokens_clean
-#   - stem_lookup
-#   - custom_stopwords
-#
-# This block:
-#   1. defines sharper hawkish/dovish seeds
-#   2. counts seed hits per speech
-#   3. keeps only clearly hawkish vs clearly dovish speeches
-#   4. extracts distinctive STEMS using tf-idf
-#   5. extracts distinctive BIGRAMS using tf-idf
-#   6. exports candidate files
-# ============================================================
 
 # ---------------------------
 # 1. SHARPER TONE SEEDS
 # ---------------------------
 seed_hawkish_tone <- c(
   "tightening", "restrictive", "hike", "hikes", "higher",
-  "inflationary", "persistent", "vigilance", "overheating", "anchoring"
+  "persistent", "vigilance", "overheating",
+  "restrictions", "anchored",
+  "anchor inflation", "firmly anchored",
+  "nominal anchor", "monetary anchor", "anchor currency"
 )
 
 seed_dovish_tone <- c(
   "easing", "accommodative", "stimulus", "cut", "cuts",
-  "lower", "slowdown", "weakness", "slack"
+  "lower", "slowdown", "weakness", "slack",
+  "downside risks", "weak demand", "subdued inflation",
+  "below target", "support growth", "recovery concerns",
+  "accommodative stance",
+  "qqe", "monetary easing", "quantitative easing",
+  "lower bound", "easing policy",
+  "spare capacity", "monetary stimulus"
 )
 
 hawkish_stems <- unique(SnowballC::wordStem(seed_hawkish_tone, language = "en"))
@@ -206,13 +199,24 @@ cat("PRELIMINARY HAWKISH DICTIONARY\n")
 cat("==============================\n")
 print(prelim_hawkish_dictionary$stems)
 print(prelim_hawkish_dictionary$bigrams)
+top20_words_hawkish <- prelim_hawkish_dictionary$stems$example_word[1:20]
+as.data.frame(top20_words_hawkish)
+print(top20_words_hawkish)
+top20_words_hawkish_bigram <- prelim_hawkish_dictionary$bigrams$bigram[1:20]
+as.data.frame(top20_words_hawkish_bigram)
+print(top20_words_hawkish_bigram)
 
 cat("\n==============================\n")
 cat("PRELIMINARY DOVISH DICTIONARY\n")
 cat("==============================\n")
 print(prelim_dovish_dictionary$stems)
 print(prelim_dovish_dictionary$bigrams)
-
+top20_words_dovish <- prelim_dovish_dictionary$stems$example_word[1:20]
+as.data.frame(top20_words_dovish)
+print(top20_words_dovish)
+top20_words_dovish_bigram <- prelim_dovish_dictionary$bigrams$bigram[1:20]
+as.data.frame(top20_words_dovish_bigram)
+print(top20_words_dovish_bigram)
 # optional exports
 readr::write_csv(prelim_hawkish_dictionary$stems, "prelim_hawkish_dictionary_stems.csv")
 readr::write_csv(prelim_hawkish_dictionary$bigrams, "prelim_hawkish_dictionary_bigrams.csv")

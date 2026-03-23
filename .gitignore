@@ -4,3 +4,41 @@
 .Ruserdata
 CBS_dataset_v1.0.rds
 .DS_Store
+# =========================
+# DATA FILES (large / raw)
+# =========================
+data/
+*.xlsx
+*.xls
+*.csv
+
+# =========================
+# INTERMEDIATE OUTPUTS
+# =========================
+*_bigrams.csv
+*_stems.csv
+*_cooccurrence.csv
+*_tfidf.csv
+prelim_*.csv
+tone_contrast_docs.csv
+
+# =========================
+# OUTPUTS / FIGURES
+# =========================
+outputs/
+*.png
+*.jpg
+*.jpeg
+
+# =========================
+# R SPECIFIC
+# =========================
+.Rhistory
+.RData
+.Rproj.user/
+
+# =========================
+# SYSTEM FILES
+# =========================
+.DS_Store
+Thumbs.db

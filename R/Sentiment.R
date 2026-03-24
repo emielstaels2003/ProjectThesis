@@ -7,11 +7,11 @@ sentiment_data <- read_excel("data/Loughran-McDonald_MasterDictionary_1993-2024.
 # 1. Maak de lijst met negatieve woorden
 # We kijken in kolom 'Negative'. Als de waarde groter is dan 0 (het jaartal), 
 # dan voegen we het woord uit de kolom 'Word' toe aan onze lijst.
-negatieve_woorden <- Loughran_McDonald_MasterDictionary_1993_2024$Word[Loughran_McDonald_MasterDictionary_1993_2024$Negative > 0]
+negatieve_woorden <- sentiment_data$Word[sentiment_data$Negative > 0]
 
 # 2. Maak de lijst met positieve woorden
 # We doen hetzelfde voor de kolom 'Positive'.
-positieve_woorden <- Loughran_McDonald_MasterDictionary_1993_2024$Word[Loughran_McDonald_MasterDictionary_1993_2024$Positive > 0]
+positieve_woorden <- sentiment_data$Word[sentiment_data$Positive > 0]
 
 # 3. Opschonen (optioneel maar aangeraden)
 # Hiermee verwijder je eventuele lege waarden (NA's) uit de lijsten

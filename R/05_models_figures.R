@@ -13,24 +13,64 @@ final_esm_data <- final_esm_data %>%
 
 
 # We voegen 'Ticker' toe aan de fixed effects (na de '|')
-reg_final <- feols(CAR ~ i(Regulation) + i(Supervision) + Tightness + 
-                        i(Regulation):Tightness + 
-                        i(Supervision):Tightness +
+reg_final <- feols(CAR ~ i(Regulation) * Sentiment + i(Supervision) * Sentiment + 
+                        i(Regulation) * Tightness + i(Supervision) * Tightness +
                         ROA + log(TotalAssets) + TotalEquity + 
                         CapProxy + InterbankRatio | 
                         Ticker + lubridate::year(SpeechDate),
                       cluster = ~CentralBank,
                       data = final_esm_data)
 summary(reg_final)
-
 #enorm veel observaies worden verwijderd, de InterbankRatio is de oorzaak hiervan dus we halen die variabele eruit
-reg_final2 <- feols(CAR ~ i(Regulation) + i(Supervision) + Tightness + Sentiment +
-                     i(Regulation):Tightness +
-                     i(Supervision):Tightness +
-                     ROA + log(TotalAssets) + TotalEquity + CapProxy | 
-                     Ticker + lubridate::year(SpeechDate),
-                   cluster = ~CentralBank,
-                   data = final_esm_data)
+
+basismodel <- feols(CAR ~ i(Regulation) + i(Supervision) + Tightness | Ticker + lubridate::year(SpeechDate), cluster = ~CentralBank, data = final_esm_data)
+summary(basismodel)
+
+basismodel_sentiment <- feols(CAR ~ i(Regulation) + i(Supervision) + Tightness + Sentiment | Ticker + lubridate::year(SpeechDate), cluster = ~CentralBank, data = final_esm_data)
+summary(basismodel_sentiment)
+
+interactie_model <- feols(CAR ~ i(Regulation)*Sentiment + i(Supervision)*Sentiment + i(Regulation)*Tightness + i(Supervision)*Tightness | Ticker + lubridate::year(SpeechDate), cluster = ~CentralBank, data = final_esm_data)
+summary(interactie_model)
+
+all_in_model <- feols(CAR ~ i(Regulation) * Sentiment + i(Supervision) * Sentiment + 
+                        i(Regulation) * Tightness + i(Supervision) * Tightness +
+                        ROA + log(TotalAssets) + TotalEquity + 
+                        CapProxy | 
+                        Ticker + lubridate::year(SpeechDate),
+                      cluster = ~CentralBank,
+                      data = final_esm_data)
+summary(all_in_model)
+
+library(modelsummary)
+
+# Maak een lijst van je vier modellen
+modellen_lijst <- list(
+  "(1) Basis"           = basismodel,
+  "(2) + Sentiment"      = basismodel_sentiment,
+  "(3) Interactie"      = interactie_model,
+  "(4) All-in"          = all_in_model
+)
+
+# Genereer de tabel
+msummary(modellen_lijst,
+         stars = TRUE,           # Voegt de sterretjes toe (*** p<0.001, etc.)
+         fmt = 4,                # Rondt af op 4 decimalen (vervangt de e-03 notatie)
+         estimate = "estimate",  # Toont de coëfficiënt
+         statistic = "std.error",# Toont standaardfout tussen haakjes daaronder
+         gof_omit = "AIC|BIC|Log|RMSE", # Verbergt overbodige statistieken
+         title = "Tabel: Impact of Central Bank Communication on CAR",
+         notes = "Standard errors are clustered on central bank level")
+
+
+
+
+reg_final2 <- feols(CAR ~ i(Regulation) * Sentiment + i(Supervision) * Sentiment + 
+                      i(Regulation) * Tightness + i(Supervision) * Tightness +
+                      ROA + log(TotalAssets) + TotalEquity + 
+                      CapProxy | 
+                      Ticker + lubridate::year(SpeechDate),
+                    cluster = ~CentralBank,
+                    data = final_esm_data)
 summary(reg_final2)
 # OBSERVATIE1
 # Regulation2 significant: Wanneer centrale banken intensief communiceren over nieuwe regelgeving (niveau 2),

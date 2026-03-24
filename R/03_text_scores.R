@@ -20,11 +20,11 @@ assign_zero_inflated_intensity <- function(x) {
 }
 
 # De 6 ontkenningswoorden van L&M
-negations <- c("NO", "NOT", "NONE", "NEITHER", "NEVER", "NOBODY")
-negation_pattern <- paste0("\\b(", paste(negations, collapse = "|"), ")\\b")
+#negations <- c("NO", "NOT", "NONE", "NEITHER", "NEVER", "NOBODY")
+#negation_pattern <- paste0("\\b(", paste(negations, collapse = "|"), ")\\b")
 
 # Functie om positieve woorden te tellen met correctie voor negatie
-count_pos_with_negation <- function(text_vector, pos_words_list) {
+#count_pos_with_negation <- function(text_vector, pos_words_list) {
   sapply(text_vector, function(txt) {
     # Splits tekst in losse woorden
     words <- str_split(txt, "\\s+")[[1]]
@@ -64,8 +64,8 @@ dovish_terms  <- "\\b(lower|weak|easing|cut|accommodative|slowdown|stimulus|slac
 reg_terms <- "\\b(capital|basel|requirements|standards|regulation|regulatory|rules|buffer|compliance|lcr|ccyb|tlac|sifis|sibs|ccar|aml|kyc|bcbs|microprudential|Liquidity Coverage Ratio|Countercyclical Capital Buffer|Total Loss-Absorbing Capacity|Systemically Important Financial Institutions|Systemically Important Banks|Comprehensive Capital Analysis and Review|Anti-Money Laundering|Know Your Customer|Basel Committee on Banking Supervision)\\b"
 sup_terms <- "\\b(supervision|supervisory|oversight|monitoring|compliance|inspection|surveillance|review|assessment|prudential)\\b"
 #Voor Sentiment
-neg_pattern <- paste0("\\b(", paste(negatieve_woorden, collapse = "|"), ")\\b")
-pos_pattern <- paste0("\\b(", paste(positieve_woorden, collapse = "|"), ")\\b")
+#neg_pattern <- paste0("\\b(", paste(negatieve_woorden, collapse = "|"), ")\\b")
+#pos_pattern <- paste0("\\b(", paste(positieve_woorden, collapse = "|"), ")\\b")
 #Bereken de scores
 speeches_subset <- speeches_subset %>%
   mutate(
@@ -84,13 +84,17 @@ speeches_subset <- speeches_subset %>%
     raw_S = str_count(text_low, sup_terms) / word_count,
     
     # C. SENTIMENT CONTROLE (L&M Methode)
-    lm_neg_count = str_count(text_up, neg_pattern),
-    lm_pos_count = count_pos_with_negation(text_up, positieve_woorden),
-    raw_sentiment = (lm_pos_count - lm_neg_count) / word_count
+    #lm_neg_count = str_count(text_up, neg_pattern),
+    #lm_pos_count = count_pos_with_negation(text_up, positieve_woorden),
+    #raw_sentiment = (lm_pos_count - lm_neg_count) / word_count
   )
 #Omzetten naar finale variabelen
 # Voor Tightness gebruiken we de continue Z-score (nauwkeuriger voor regressie)
 speeches_subset <- speeches_subset %>%
+  mutate(
+    Tightness = (raw_T_sentiment - mean(raw_T_sentiment, na.rm=TRUE)) / sd(raw_T_sentiment, na.rm=TRUE))
+view(speeches_subset)
+#speeches_subset <- speeches_subset %>%
   mutate(
     Tightness = (raw_T_sentiment - mean(raw_T_sentiment, na.rm=TRUE)) / sd(raw_T_sentiment, na.rm=TRUE),
     Sentiment = (raw_sentiment - mean(raw_sentiment, na.rm=TRUE)) / sd(raw_sentiment, na.rm=TRUE),

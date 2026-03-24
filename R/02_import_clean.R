@@ -78,9 +78,29 @@ chartSeries(STOXX50E,
             theme = chartTheme("white"), 
             name = "STOXX50E (Adjusted Close Price)",
             TA = NULL)                 # Geen extra indicatoren
-rm(KSA)
 
-
-
-
-
+data_framed <- supervision_dates %>%
+  left_join(speeches_subset, by = c("bank" = "CentralBank"))
+setdiff(supervision_dates$bank, unique(speeches_subset$CentralBank))
+data_framed <- speeches_subset %>%
+  left_join(supervision_dates, by = c("CentralBank" = "bank"))
+dim(data_framed)
+colnames(data_framed)
+table(is.na(data_framed$direct_supervisory_power_date))
+data_framed <- data_framed %>%
+  mutate(
+    Date_Clean = as.Date(Date_Clean),
+    direct_supervisory_power_date = as.Date(direct_supervisory_power_date),
+    post_supervision = ifelse(
+      !is.na(direct_supervisory_power_date) &
+        Date_Clean >= direct_supervisory_power_date,
+      1, 0
+    )
+  )
+table(data_framed$post_supervision, useNA = "ifany")
+data_framed %>%
+  group_by(CentralBank) %>%
+  summarise(
+    min_post = min(post_supervision),
+    max_post = max(post_supervision)
+  )

@@ -92,6 +92,41 @@ tickers <- c(
   "GFNORTEO.MX", "BINBURSAO.MX", "SANMEXB.MX", "AKBNK.IS", "GARAN.IS", 
   "ISCTR.IS", "HALKB.IS", "VAKBN.IS", "UBSG.SW" 
 )
+
+supervision_dates <- data.frame(
+  bank = c(
+    "European Central Bank",
+    "Board of Governors of the Federal Reserve",
+    "Reserve Bank of Australia",
+    "Bank of Mexico",
+    "Bank of Canada",
+    "Bank of Japan",
+    "Bank of England",
+    "Central Bank of Argentina",
+    "Central Bank of Brazil",
+    "People's Bank of China",
+    "Reserve Bank of India",
+    "Bank Indonesia",
+    "Bank of Korea",
+    "Bank of Russia",
+    "Saudi Central Bank",
+    "Central Bank of the Republic of Turkey",
+    "South African Reserve Bank",
+    "Swiss National Bank"
+  ),
+  direct_supervisory_power_date = as.Date(c(
+    "2014-11-04","1913-12-23",NA,NA,NA,NA,
+    "2013-04-01","1992-09-30","1964-12-31",
+    "1984-01-01","1949-01-01",NA,NA,
+    "2002-07-10","1966-06-11",NA,
+    "2018-04-01",NA
+  )),
+  has_direct_power = c(
+    TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, TRUE, TRUE, TRUE,
+    TRUE, TRUE, FALSE, FALSE, TRUE, TRUE, FALSE, TRUE, FALSE
+  )
+)
+
 aantal <- length(tickers)
 # Toon het resultaat in de console
 print(paste("De lijst bevat", aantal, "tickers."))

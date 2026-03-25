@@ -80,7 +80,7 @@ for(j in 1:nrow(Bank_Mapping)) {
 }
 
 final_esm_data <- bind_rows(results_list)
-View(final_esm_data)
+#View(final_esm_data)
 
 final_esm_data <- final_esm_data %>%
   mutate(SpeechDate = as.Date(SpeechDate),
@@ -142,3 +142,16 @@ final_esm_data <- final_esm_data %>%
 
 # Check het resultaat
 head(final_esm_data)
+
+#View(final_esm_data)
+
+
+
+
+# 2. Voeg de kolom toe aan final_esm_data
+final_esm_data <- final_esm_data %>%
+  mutate(is_GSIB = ifelse(Ticker %in% gsib_tickers, 1, 0))
+
+# 3. Controle: Hoeveel observaties zijn gelinkt aan een G-SIB?
+table(final_esm_data$is_GSIB)
+

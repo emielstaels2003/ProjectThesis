@@ -7,8 +7,10 @@ final_esm_data <- final_esm_data %>%
     CapProxy = as.numeric(as.character(CapProxy)),
     InterbankRatio = as.numeric(as.character(InterbankRatio)),
     # Categorieën (factoren laten)
-    Regulation = as.factor(Regulation),
-    Supervision = as.factor(Supervision)
+    # Regulation = as.factor(Regulation),
+    # Supervision = as.factor(Supervision)
+    Regulation = as.numeric(as.character(Regulation)),
+    Supervision = as.numeric(as.character(Supervision))
   )
 
 
@@ -23,23 +25,58 @@ reg_final <- feols(CAR ~ i(Regulation) * Sentiment + i(Supervision) * Sentiment 
 summary(reg_final)
 #enorm veel observaies worden verwijderd, de InterbankRatio is de oorzaak hiervan dus we halen die variabele eruit
 
+model_supervision <- feols(CAR ~ Supervision | Ticker + lubridate::year(SpeechDate), cluster = ~CentralBank, data = final_esm_data)
+summary(model_supervision)
+
+model_regulation <- feols(CAR ~ Regulation | Ticker + lubridate::year(SpeechDate), cluster = ~CentralBank, data = final_esm_data)
+summary(model_regulation)
+
+model_supervision_tightness <- feols(CAR ~ Supervision * Tightness | Ticker + lubridate::year(SpeechDate), cluster = ~CentralBank, data = final_esm_data)
+summary(model_supervision_tightness)
+
+mod <- feols(CAR ~ Regulation + Supervision + ROA + log(TotalAssets) + TotalEquity + CapProxy | Ticker + lubridate::year(SpeechDate), cluster = ~CentralBank, data = final_esm_data)
+summary(mod)
+
 basismodel <- feols(CAR ~ i(Regulation) + i(Supervision) + Tightness | Ticker + lubridate::year(SpeechDate), cluster = ~CentralBank, data = final_esm_data)
 summary(basismodel)
 
-basismodel_sentiment <- feols(CAR ~ i(Regulation) + i(Supervision) + Tightness + Sentiment | Ticker + lubridate::year(SpeechDate), cluster = ~CentralBank, data = final_esm_data)
-summary(basismodel_sentiment)
 
-interactie_model <- feols(CAR ~ i(Regulation)*Sentiment + i(Supervision)*Sentiment + i(Regulation)*Tightness + i(Supervision)*Tightness | Ticker + lubridate::year(SpeechDate), cluster = ~CentralBank, data = final_esm_data)
+
+#basismodel_sentiment <- feols(CAR ~ i(Regulation) + i(Supervision) + Tightness + Sentiment | Ticker + lubridate::year(SpeechDate), cluster = ~CentralBank, data = final_esm_data)
+#summary(basismodel_sentiment)
+
+interactie_model <- feols(CAR ~ i(Regulation)*Tightness + i(Supervision)*Tightness | Ticker + lubridate::year(SpeechDate), cluster = ~CentralBank, data = final_esm_data)
 summary(interactie_model)
 
-all_in_model <- feols(CAR ~ i(Regulation) * Sentiment + i(Supervision) * Sentiment + 
-                        i(Regulation) * Tightness + i(Supervision) * Tightness +
+all_in_model <- feols(CAR ~ i(Regulation) * Tightness + i(Supervision) * Tightness +
                         ROA + log(TotalAssets) + TotalEquity + 
                         CapProxy | 
                         Ticker + lubridate::year(SpeechDate),
                       cluster = ~CentralBank,
                       data = final_esm_data)
 summary(all_in_model)
+
+all_in_model2 <- feols(CAR ~ 
+                        # 1. Interactie voor Regulation: Sentiment * Intensiteit * Macht
+                        Regulation * Tightness * Has_Supervisory_Power + 
+                        
+                        # 2. Interactie voor Supervision: Sentiment * Intensiteit * Macht
+                        Supervision * Tightness * Has_Supervisory_Power + 
+                        
+                        # 3. Controle variabelen (Bank-kenmerken)
+                        ROA + log(TotalAssets) + TotalEquity + CapProxy | 
+                        
+                        # 4. Fixed Effects: Ticker (Bank) en Jaar
+                        Ticker + lubridate::year(SpeechDate),
+                      
+                      # 5. Clustering op CentralBank niveau
+                      cluster = ~CentralBank,
+                      data = final_esm_data)
+
+summary(all_in_model2)
+
+
+
 
 library(modelsummary)
 

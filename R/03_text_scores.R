@@ -24,7 +24,7 @@ assign_zero_inflated_intensity <- function(x) {
 #negation_pattern <- paste0("\\b(", paste(negations, collapse = "|"), ")\\b")
 
 # Functie om positieve woorden te tellen met correctie voor negatie
-#count_pos_with_negation <- function(text_vector, pos_words_list) {
+count_pos_with_negation <- function(text_vector, pos_words_list) {
   sapply(text_vector, function(txt) {
     # Splits tekst in losse woorden
     words <- str_split(txt, "\\s+")[[1]]
@@ -92,20 +92,26 @@ speeches_subset <- speeches_subset %>%
 # Voor Tightness gebruiken we de continue Z-score (nauwkeuriger voor regressie)
 speeches_subset <- speeches_subset %>%
   mutate(
-    Tightness = (raw_T_sentiment - mean(raw_T_sentiment, na.rm=TRUE)) / sd(raw_T_sentiment, na.rm=TRUE))
-view(speeches_subset)
-#speeches_subset <- speeches_subset %>%
-  mutate(
     Tightness = (raw_T_sentiment - mean(raw_T_sentiment, na.rm=TRUE)) / sd(raw_T_sentiment, na.rm=TRUE),
-    Sentiment = (raw_sentiment - mean(raw_sentiment, na.rm=TRUE)) / sd(raw_sentiment, na.rm=TRUE),
+#    Sentiment = (raw_sentiment - mean(raw_sentiment, na.rm=TRUE)) / sd(raw_sentiment, na.rm=TRUE),
   )
 
-# (Gebruik de 'assign_zero_inflated_intensity' functie die je al in je script had staan)
+# (Gebruik de 'assign_zero_inflated_intensity' functie die je al in je script had staan) omzetten van continue naar ordinale variabele
+#speeches_subset <- speeches_subset %>%
+#  mutate(
+#    Regulation  = assign_zero_inflated_intensity(raw_R),
+#    Supervision = assign_zero_inflated_intensity(raw_S)
+#  )
+
+# continue var gebruiken ipv ordinale
 speeches_subset <- speeches_subset %>%
   mutate(
-    Regulation  = assign_zero_inflated_intensity(raw_R),
-    Supervision = assign_zero_inflated_intensity(raw_S)
-  )
+    # 2. Regulation: Nu ook continu via Z-score
+    Regulation = (raw_R - mean(raw_R, na.rm=TRUE)) / sd(raw_R, na.rm=TRUE),
+    
+    # 3. Supervision: Nu ook continu via Z-score
+    Supervision = (raw_S - mean(raw_S, na.rm=TRUE)) / sd(raw_S, na.rm=TRUE)
+)
 #Controleer het resultaat
 print("Samenvatting Tightness (Z-score):")
 summary(speeches_subset$Tightness)

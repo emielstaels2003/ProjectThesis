@@ -74,6 +74,26 @@ target_banks <- c(
   "Swiss National Bank"
 )
 
+# Lijst van de 34 G-SIB tickers gebaseerd op je tabel
+gsib_tickers <- c(
+  # Europe (ECB)
+  "BNP.PA", "GLE.PA", "ACA.PA", "DBK.DE", "CBK.DE", "SAN.MC", "BBVA.MC", "UCG.MI", "INGA.AS", "NDA-FI.HE",
+  # USA (Fed)
+  "JPM", "BAC", "C", "GS", "MS", "WFC", "BK", "STT",
+  # Canada
+  "RY.TO", "TD.TO",
+  # Japan
+  "8306.T", "8316.T", "8411.T",
+  # United Kingdom
+  "HSBA.L", "BARC.L", "STAN.L", "NWG.L", "LLOY.L",
+  # China
+  "601398.SS", "601988.SS", "601288.SS", "601939.SS", "601328.SS",
+  # Switzerland
+  "UBSG.SW"
+)
+# Controleer of het er exact 34 zijn
+length(gsib_tickers)
+
 tickers <- c(
   "BNP.PA", "GLE.PA", "ACA.PA", "DBK.DE", "CBK.DE", "SAN.MC", "BBVA.MC", 
   "UCG.MI", "INGA.AS", "NDA-FI.HE", "JPM", "BAC", "C", "GS", "MS", "WFC", 

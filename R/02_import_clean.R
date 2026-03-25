@@ -79,28 +79,57 @@ chartSeries(STOXX50E,
             name = "STOXX50E (Adjusted Close Price)",
             TA = NULL)                 # Geen extra indicatoren
 
-data_framed <- supervision_dates %>%
-  left_join(speeches_subset, by = c("bank" = "CentralBank"))
-setdiff(supervision_dates$bank, unique(speeches_subset$CentralBank))
+# =========================
+# 5. SUPERVISION DATA
+# =========================
+
+supervision_dates <- data.frame(
+  bank = target_banks,
+  direct_supervisory_power_date = as.Date(c(
+    "2014-11-04","1913-12-23",NA,NA,NA,NA,
+    "2013-04-01","1992-09-30","1964-12-31",
+    "1984-01-01","1949-01-01",NA,NA,
+    "2002-07-10","1966-06-11",NA,
+    "2018-04-01",NA
+  )),
+  has_direct_power = c(
+    TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, TRUE, TRUE, TRUE,
+    TRUE, TRUE, FALSE, FALSE, TRUE, TRUE, FALSE, TRUE, FALSE
+  )
+)
+
+# =========================
+# 6. MERGE (BELANGRIJK)
+# =========================
+
 data_framed <- speeches_subset %>%
   left_join(supervision_dates, by = c("CentralBank" = "bank"))
-dim(data_framed)
-colnames(data_framed)
-table(is.na(data_framed$direct_supervisory_power_date))
+
+# =========================
+# 7. CREATE TREATMENT VARIABLE
+# =========================
+
 data_framed <- data_framed %>%
   mutate(
-    Date_Clean = as.Date(Date_Clean),
-    direct_supervisory_power_date = as.Date(direct_supervisory_power_date),
     post_supervision = ifelse(
       !is.na(direct_supervisory_power_date) &
         Date_Clean >= direct_supervisory_power_date,
       1, 0
     )
   )
-table(data_framed$post_supervision, useNA = "ifany")
+
+# =========================
+# 8. CHECKS (ESSENTIEEL)
+# =========================
+
+print(dim(data_framed))
+print(table(is.na(data_framed$direct_supervisory_power_date)))
+print(table(data_framed$post_supervision))
+
 data_framed %>%
   group_by(CentralBank) %>%
   summarise(
     min_post = min(post_supervision),
     max_post = max(post_supervision)
-  )
+  ) %>%
+  print()

@@ -125,3 +125,20 @@ final_esm_data <- final_esm_data %>%
   )) %>%
   select(-start_date, -end_date)
 
+
+final_esm_data <- final_esm_data %>%
+  # 1. Plak de startdata uit de referentietabel aan je dataset
+  left_join(supervision_dates, by = c("CentralBank" = "bank")) %>%
+  
+  # 2. Maak de dummy aan
+  mutate(Has_Supervisory_Power = ifelse(
+    !is.na(direct_supervisory_power_date) & SpeechDate >= direct_supervisory_power_date, 
+    1, 
+    0
+  )) %>%
+  
+  # 3. Optioneel: verwijder de hulp-datumkolom weer als je die niet nodig hebt
+  select(-direct_supervisory_power_date)
+
+# Check het resultaat
+head(final_esm_data)

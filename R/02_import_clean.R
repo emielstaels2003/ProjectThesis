@@ -133,3 +133,6 @@ data_framed %>%
     max_post = max(post_supervision)
   ) %>%
   print()
+
+
+View(speeches_subset)

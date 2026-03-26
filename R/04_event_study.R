@@ -145,7 +145,13 @@ head(final_esm_data)
 
 #View(final_esm_data)
 
-
+final_esm_data$SpeechDate <- as.Date(final_esm_data$SpeechDate)
+# Voeg de VIX kolom toe aan de dataset
+final_esm_data <- final_esm_data %>%
+  left_join(vix_df, by = "SpeechDate") %>%
+  arrange(SpeechDate) %>%
+  # Vul ontbrekende waarden (weekenden) in met de laatst bekende koers
+  fill(VIX_Level, .direction = "down") 
 
 
 # 2. Voeg de kolom toe aan final_esm_data

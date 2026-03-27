@@ -264,6 +264,40 @@ final_table_complete
 
 ##### E: CORRELATIEMATRIX1
 
+###### BELANGRIJK ONDERSCHEID CORR MATRIX OP SPEECHES_SUBSET OF OP FINAL_ESM_DATA WANT:
+# speeches_subset: iedere speech telt 1 keer
+# final_esm_data: eenzelfde speech zit er meerdere keren in voor verschillende banken en dus tel je data dubbel!
+# corr berekenen op speeches_subset meer zinvol naar mijn mening
+
+# OP SPEECHES_SUBSET
+
+# 1. Gebruik de speeches_subset voor de linguïstische correlaties (unieke speeches)
+# We selecteren hier de variabelen die de aard van de communicatie beschrijven
+corr_data_speeches <- speeches_subset %>%
+  select(
+    Tightness, 
+    Regulation, 
+    Supervision
+  )
+
+# 2. Bereken de correlatiematrix op de unieke speeches
+# Omdat dit de subset is zonder bank-data, komt Tightness:Supervision nu op 0.14 uit
+corr_matrix_speeches <- cor(corr_data_speeches, use = "complete.obs")
+
+# 3. Genereer de visualisatie
+library(ggcorrplot)
+ggcorrplot(corr_matrix_speeches, 
+           hc.order = FALSE,           # We houden de volgorde logisch
+           type = "lower",             # Alleen de onderste driehoek
+           lab = TRUE,                 # Toon de cijfers (0.14, 0.47, etc.)
+           lab_size = 5, 
+           method = "square", 
+           colors = c("#E46726", "white", "#6D9ECB"), 
+           title = "Correlation Matrix: Central Bank Communication (N = 11,747)",
+           ggtheme = theme_minimal())
+
+# OP FINAL_ESM_DATA
+
 install.packages("ggcorrplot")
 library(ggcorrplot)
 library(dplyr)
@@ -272,10 +306,6 @@ library(dplyr)
 corr_data_clean <- final_esm_data %>%
   mutate(log_Assets = log(TotalAssets)) %>%
   select(
-    CAR, 
-    Tightness, 
-    Regulation, 
-    Supervision, 
     ROA, 
     log_Assets, 
     TotalEquity, 
@@ -368,7 +398,6 @@ final_corr_table <- corr_df %>%
 final_corr_table
 
 
-
 ##### H: SCORE SUP/REG PER JAAR PER CENTRALE BANK
 
 install.packages("janitor")
@@ -388,11 +417,12 @@ speeches_clean <- speeches_subset %>%
 
 plot_data <- speeches_clean %>%
   filter(central_bank %in% top_5_banks) %>%
+  mutate(central_bank = ifelse(grepl("Federal Reserve", central_bank), "FED", central_bank)) %>%
   # We gebruiken 'date_clean' (nu met kleine letters door clean_names)
   mutate(year_val = year(as.Date(date_clean))) %>% 
   mutate(
-    Regulation = ifelse(raw_r > 0, "Mentioned (>0)", "Not Mentioned (0)"),
-    Supervision = ifelse(raw_s > 0, "Mentioned (>0)", "Not Mentioned (0)")
+    Regulation = ifelse(raw_r > 0, "Mentioned (>=1 occurrence)", "Not Mentioned (0)"),
+    Supervision = ifelse(raw_s > 0, "Mentioned (>=1 occurrence)", "Not Mentioned (0)")
   ) %>%
   pivot_longer(cols = c(Regulation, Supervision), 
                names_to = "Topic", 
@@ -404,7 +434,10 @@ ggplot(plot_data, aes(x = year_val, fill = Presence)) +
   facet_grid(Topic ~ central_bank) + 
   scale_y_continuous(labels = scales::percent) +
   scale_x_continuous(breaks = seq(1997, 2023, by = 5)) +
-  scale_fill_manual(values = c("Mentioned (>0)" = "#2c7bb6", "Not Mentioned (0)" = "#d7191c")) +
+  scale_fill_manual(values = c(
+    "Mentioned (>=1 occurrence)" = "#2c7bb6", 
+    "Not Mentioned (0)" = "#d7191c"
+  )) +
   labs(
     title = "Evolution of Policy Discourse (1997-2023)",
     subtitle = "Relative share of speeches mentioning Regulation vs. Supervision",
@@ -420,4 +453,30 @@ ggplot(plot_data, aes(x = year_val, fill = Presence)) +
   )
 
 
+
+ggplot(plot_data, aes(x = year_val, fill = Presence)) +
+  # Voeg 'color = NA' toe en zet 'width = 1' om de lijnen te verwijderen
+  geom_bar(position = "fill", color = NA, width = 1) +
+  facet_grid(Topic ~ central_bank) +
+  scale_y_continuous(labels = scales::percent, expand = c(0,0)) + # expand verwijdert witruimte onder/boven
+  scale_x_continuous(breaks = seq(1997, 2023, by = 5)) +
+  scale_fill_manual(values = c(
+    "Mentioned (>=1 occurrence)" = "#2c7bb6", 
+    "Not Mentioned (0)" = "#d7191c"
+  )) +
+  labs(
+    title = "Evolution of Policy Discourse (1997-2023)",
+    subtitle = "Relative share of speeches mentioning Regulation vs. Supervision",
+    x = "Year",
+    y = "Percentage of Total Speeches",
+    fill = "Speech Content"
+  ) +
+  theme_minimal() +
+  theme(
+    panel.grid.major.x = element_blank(), # Verwijder verticale gridlijnen
+    panel.grid.minor.x = element_blank(), # Verwijder kleine verticale gridlijnen
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 8),
+    legend.position = "bottom",
+    strip.text = element_text(face = "bold", size = 9)
+  )
 

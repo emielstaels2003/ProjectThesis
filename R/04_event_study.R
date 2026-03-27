@@ -161,3 +161,6 @@ final_esm_data <- final_esm_data %>%
 # 3. Controle: Hoeveel observaties zijn gelinkt aan een G-SIB?
 table(final_esm_data$is_GSIB)
 
+
+# Maak een nieuwe kolom aan met de absolute waarde van de CAR
+final_esm_data$abs_CAR <- abs(final_esm_data$CAR)

@@ -94,6 +94,56 @@ m4.3_triple_gsib <- feols(CAR ~ Supervision * Tightness * is_GSIB +
                           data = final_esm_data)
 summary(m4.3_triple_gsib)
 
+# ONDERZOEKSVRAAG 5
+
+m5.1_crisis_relevance <- feols(abs_CAR ~ Regulation * crisis + 
+                                 Supervision * crisis + 
+                                 ROA + log(TotalAssets) + CapProxy | 
+                                 Ticker + year_month, 
+                               data = final_esm_data)
+
+summary(m5.1_crisis_relevance)
+
+m5.2_crisis_sensitivity <- feols(CAR ~ Regulation * crisis + 
+                                   Supervision * crisis + 
+                                   Tightness * crisis + 
+                                   ROA + log(TotalAssets) + CapProxy | 
+                                   Ticker + year_month, 
+                                 data = final_esm_data)
+
+summary(m5.2_crisis_sensitivity)
+
+m5.3_crisis_triple <- feols(CAR ~ Supervision * Tightness * crisis + 
+                              Regulation * Tightness * crisis + 
+                              ROA + log(TotalAssets) + CapProxy | 
+                              Ticker + year_month, 
+                            data = final_esm_data)
+
+summary(m5.3_crisis_triple)
+
+m5.4_vix_relevance <- feols(abs_CAR ~ Regulation * VIX_Level + 
+                              Supervision * VIX_Level +
+                              ROA + log(TotalAssets) + CapProxy | 
+                              Ticker + year_month, 
+                            data = final_esm_data)
+summary(m5.4_vix_relevance)
+
+m5.5_vix_sensitivity <- feols(CAR ~ Regulation * VIX_Level + 
+                                Supervision * VIX_Level + 
+                                Tightness * VIX_Level + 
+                                ROA + log(TotalAssets) + CapProxy | 
+                                Ticker + year_month, 
+                              data = final_esm_data)
+summary(m5.5_vix_sensitivity)
+
+m5.6_vix_triple <- feols(CAR ~ Supervision * Tightness * VIX_Level + 
+                           Regulation * Tightness * VIX_Level + 
+                           ROA + log(TotalAssets) + CapProxy | 
+                           Ticker + year_month, 
+                         data = final_esm_data)
+
+summary(m5.6_vix_triple)
+
 # SAMENVATTENDE TABEL VAN ALLE RESULTATEN
 
 library(modelsummary)
@@ -109,7 +159,13 @@ modellen_h1 <- list(
   "M3.3 (CAR)" = m3.3_triple_power,
   "M4.1 (|CAR|)" = m4.1_gsib_intensity,
   "M4.2 (CAR)" = m4.2_gsib_direction,
-  "M4.3 (CAR)" = m4.3_triple_gsib
+  "M4.3 (CAR)" = m4.3_triple_gsib,
+  "M5.1 (|CAR|)" = m5.1_crisis_relevance,
+  "M5.2 (CAR)" = m5.2_crisis_sensitivity,
+  "M5.3 (CAR)" = m5.3_crisis_triple,
+  "M5.4 (|CAR|)" = m5.4_vix_relevance,
+  "M5.5 (CAR)" = m5.5_vix_sensitivity,
+  "M5.6 (CAR)" = m5.6_vix_triple
 )
 
 # Genereer de tabel als 'markdown' (verschijnt in je console onderaan)

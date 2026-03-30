@@ -164,3 +164,4 @@ table(final_esm_data$is_GSIB)
 
 # Maak een nieuwe kolom aan met de absolute waarde van de CAR
 final_esm_data$abs_CAR <- abs(final_esm_data$CAR)
+

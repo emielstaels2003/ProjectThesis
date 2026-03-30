@@ -192,3 +192,4 @@ modelsummary(modellen_h1,
                           "log(TotalAssets)" = "Bank size (log)",
                           "CapProxy" = "Capital Proxy"),
              gof_map = c("nobs", "r.squared", "adj.r.squared"))
+

@@ -189,11 +189,11 @@ library(kableExtra)
 
 O1 <- list(
   "Market CAR" = m1.1_direction,
-  "Market absCAR" = m1.2_intensity,
   "FF CAR" = ff3_r1_direction,
-  "FF absCAR" = ff3_r1_intensity,
   "lagged CAR" = lag_m1_1_direction,
-  "lagged absCAR" = lag_m1_2_intensity
+  "Market |CAR|" = m1.2_intensity,
+  "FF |CAR|" = ff3_r1_intensity,
+  "lagged |CAR|" = lag_m1_2_intensity
 )
 # Genereer de tabel als 'markdown' (verschijnt in je console onderaan)
 modelsummary(O1, 
@@ -203,7 +203,7 @@ modelsummary(O1,
              coef_map = c("Regulation" = "Regulation", 
                           "Supervision" = "Supervision",
                           "ROA" = "ROA",
-                          "log(TotalAssets)" = "Bank size (log)",
+                          "log(TotalAssets)" = "Total Assets (log)",
                           "CapProxy" = "Capital Proxy"),
              gof_map = c("nobs", "r.squared", "adj.r.squared"))
 # Output in Viewer rechts onderaan
@@ -213,6 +213,39 @@ modelsummary(O1,
              fmt = 4, 
              coef_map = c("Regulation" = "Regulation", 
                           "Supervision" = "Supervision",
+                          "ROA" = "ROA",
+                          "log(TotalAssets)" = "Bank size (log)",
+                          "CapProxy" = "Capital Proxy"),
+             gof_map = c("nobs", "r.squared", "adj.r.squared"))
+
+O2 <- list(
+  "Market CAR" = m2.1_tightness,
+  "FF CAR" = ff3_r2_tightness,
+  "lagged CAR" = lag_m2_1_tightness,
+  "Market CAR interaction" = m2.2_tightness_interaction,
+  "FF CAR interaction" = ff3_r2_tightness_interact,
+  "lagged CAR interaction" = lag_m2_2_tightness_interaction
+)
+# Genereer de tabel als 'markdown' (verschijnt in je console onderaan)
+modelsummary(O2, 
+             stars = TRUE, 
+             output = "markdown",
+             fmt = 4,
+             coef_map = c("Regulation" = "Regulation", 
+                          "Supervision" = "Supervision",
+                          "Tightness" = "Tightness",
+                          "ROA" = "ROA",
+                          "log(TotalAssets)" = "Total Assets (log)",
+                          "CapProxy" = "Capital Proxy"),
+             gof_map = c("nobs", "r.squared", "adj.r.squared"))
+# Output in Viewer rechts onderaan
+modelsummary(O2, 
+             stars = TRUE, 
+             output = "kableExtra",
+             fmt = 4, 
+             coef_map = c("Regulation" = "Regulation", 
+                          "Supervision" = "Supervision",
+                          "Tightness" = "Tightness",
                           "ROA" = "ROA",
                           "log(TotalAssets)" = "Bank size (log)",
                           "CapProxy" = "Capital Proxy"),

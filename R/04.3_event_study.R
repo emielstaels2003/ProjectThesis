@@ -74,3 +74,78 @@ for(j in 1:nrow(Bank_Mapping)) {
 }
 
 final_esm_lagged_data <- bind_rows(results_list_lagged)
+
+final_esm_lagged_data <- final_esm_lagged_data %>%
+  mutate(SpeechDate = as.Date(SpeechDate),
+         Index_Ticker = trimws(Index_Ticker)) %>%
+  mutate(crisis = 0L)
+
+# --- 1) Wereldwijde crises (apply to all banks within interval)
+cr_world <- Crisis %>%
+  rename(start_date = `start date`, end_date = `end date`) %>%
+  mutate(start_date = as.Date(start_date),
+         end_date   = as.Date(end_date),
+         worldwide  = toupper(trimws(worldwide))) %>%
+  filter(worldwide == "YES") %>%
+  select(start_date, end_date)
+
+final_esm_lagged_data <- final_esm_lagged_data %>%
+  mutate(crisis = ifelse(
+    crisis == 1L |
+      rowSums(sapply(1:nrow(cr_world), function(i)
+        SpeechDate >= cr_world$start_date[i] & SpeechDate <= cr_world$end_date[i]
+      )) > 0,
+    1L, crisis
+  ))
+
+# --- 2) Lokale crises (apply only if Index_Ticker matches AND within interval)
+cr_local <- Crisis %>%
+  rename(start_date = `start date`, end_date = `end date`) %>%
+  mutate(start_date = as.Date(start_date),
+         end_date   = as.Date(end_date),
+         worldwide  = toupper(trimws(worldwide))) %>%
+  filter(worldwide != "YES") %>%
+  pivot_longer(cols = c(index, index2), values_to = "Index_Ticker") %>%
+  mutate(Index_Ticker = trimws(Index_Ticker)) %>%
+  filter(!is.na(Index_Ticker), Index_Ticker != "") %>%
+  select(start_date, end_date, Index_Ticker)
+
+final_esm_lagged_data <- final_esm_lagged_data %>%
+  left_join(cr_local, by = "Index_Ticker") %>%
+  mutate(crisis = ifelse(
+    crisis == 1L | (!is.na(start_date) & SpeechDate >= start_date & SpeechDate <= end_date),
+    1L, crisis
+  )) %>%
+  select(-start_date, -end_date)
+
+# --- Supervisory power dummy
+final_esm_lagged_data <- final_esm_lagged_data %>%
+  left_join(supervision_dates, by = c("CentralBank" = "bank")) %>%
+  mutate(Has_Supervisory_Power = ifelse(
+    !is.na(direct_supervisory_power_date) & SpeechDate >= direct_supervisory_power_date, 
+    1, 
+    0
+  )) %>%
+  select(-direct_supervisory_power_date)
+
+# Check
+head(final_esm_lagged_data)
+
+# --- Ensure date format
+final_esm_lagged_data$SpeechDate <- as.Date(final_esm_lagged_data$SpeechDate)
+
+# --- Add VIX
+final_esm_lagged_data <- final_esm_lagged_data %>%
+  left_join(vix_df, by = "SpeechDate") %>%
+  arrange(SpeechDate) %>%
+  fill(VIX_Level, .direction = "down")
+
+# --- GSIB dummy
+final_esm_lagged_data <- final_esm_lagged_data %>%
+  mutate(is_GSIB = ifelse(Ticker %in% gsib_tickers, 1, 0))
+
+# Check GSIB distribution
+table(final_esm_lagged_data$is_GSIB)
+
+# --- Absolute CAR
+final_esm_lagged_data$abs_CAR <- abs(final_esm_lagged_data$CAR)

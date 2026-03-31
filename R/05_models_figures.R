@@ -15,8 +15,44 @@ final_esm_data <- final_esm_data %>%
     Supervision = as.numeric(as.character(Supervision))
   )
 
+final_esm_data_FF3 <- final_esm_data_FF3 %>%
+  mutate(
+    # Variabelen
+    ROA = as.numeric(as.character(ROA)),
+    TotalAssets = as.numeric(as.character(TotalAssets)),
+    TotalEquity = as.numeric(as.character(TotalEquity)),
+    CapProxy = as.numeric(as.character(CapProxy)),
+    InterbankRatio = as.numeric(as.character(InterbankRatio)),
+    # Categorieën (factoren laten)
+    # Regulation = as.factor(Regulation),
+    # Supervision = as.factor(Supervision)
+    Regulation = as.numeric(as.character(Regulation)),
+    Supervision = as.numeric(as.character(Supervision))
+  )
+
+final_esm_lagged_data <- final_esm_lagged_data %>%
+  mutate(
+    # Variabelen
+    ROA = as.numeric(as.character(ROA)),
+    TotalAssets = as.numeric(as.character(TotalAssets)),
+    TotalEquity = as.numeric(as.character(TotalEquity)),
+    CapProxy = as.numeric(as.character(CapProxy)),
+    InterbankRatio = as.numeric(as.character(InterbankRatio)),
+    # Categorieën (factoren laten)
+    # Regulation = as.factor(Regulation),
+    # Supervision = as.factor(Supervision)
+    Regulation = as.numeric(as.character(Regulation)),
+    Supervision = as.numeric(as.character(Supervision))
+  )
+
 # De kolom year_month aanmaken (als je dat nog niet gedaan had)
 final_esm_data$year_month <- format(as.Date(final_esm_data$SpeechDate), "%Y-%m")
+
+# De kolom year_month aanmaken (als je dat nog niet gedaan had)
+final_esm_data_FF3$year_month <- format(as.Date(final_esm_data_FF3$SpeechDate), "%Y-%m")
+
+# De kolom year_month aanmaken (als je dat nog niet gedaan had)
+final_esm_lagged_data$year_month <- format(as.Date(final_esm_lagged_data$SpeechDate), "%Y-%m")
 
 ######## OBV MARKET MODEL
 
@@ -150,6 +186,38 @@ summary(m5.6_vix_triple)
 
 library(modelsummary)
 library(kableExtra)
+
+O1 <- list(
+  "Market CAR" = m1.1_direction,
+  "Market absCAR" = m1.2_intensity,
+  "FF CAR" = ff3_r1_direction,
+  "FF absCAR" = ff3_r1_intensity,
+  "lagged CAR" = lag_m1_1_direction,
+  "lagged absCAR" = lag_m1_2_intensity
+)
+# Genereer de tabel als 'markdown' (verschijnt in je console onderaan)
+modelsummary(O1, 
+             stars = TRUE, 
+             output = "markdown",
+             fmt = 4,
+             coef_map = c("Regulation" = "Regulation", 
+                          "Supervision" = "Supervision",
+                          "ROA" = "ROA",
+                          "log(TotalAssets)" = "Bank size (log)",
+                          "CapProxy" = "Capital Proxy"),
+             gof_map = c("nobs", "r.squared", "adj.r.squared"))
+# Output in Viewer rechts onderaan
+modelsummary(O1, 
+             stars = TRUE, 
+             output = "kableExtra",
+             fmt = 4, 
+             coef_map = c("Regulation" = "Regulation", 
+                          "Supervision" = "Supervision",
+                          "ROA" = "ROA",
+                          "log(TotalAssets)" = "Bank size (log)",
+                          "CapProxy" = "Capital Proxy"),
+             gof_map = c("nobs", "r.squared", "adj.r.squared"))
+
 
 modellen_h1 <- list(
   "M1.1 (CAR)" = m1.1_direction,

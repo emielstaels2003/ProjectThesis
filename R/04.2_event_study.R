@@ -5,9 +5,10 @@ install.packages("xts")
 library(tidyfinance)
 library(xts)
 library(dplyr)
-rm(ff3)
-rm(final_esm_data_FF3)
-rm(ff3_xts)
+library(quantmod)
+#rm(ff3)
+#rm(final_esm_data_FF3)
+#rm(ff3_xts)
 
 ff3 <- download_data("factors_ff_3_daily")
 
@@ -112,7 +113,7 @@ for(j in 1:nrow(Bank_Mapping)) {
 }
 
 final_esm_data_FF3 <- bind_rows(results_list)
-view(final_esm_data_FF3)
+View(final_esm_data_FF3)
 
 final_esm_data_FF3 <- final_esm_data_FF3 %>%
   mutate(SpeechDate = as.Date(SpeechDate),
@@ -136,6 +137,8 @@ final_esm_data_FF3 <- final_esm_data_FF3 %>%
       )) > 0,
     1L, crisis
   ))
+
+library(tidyr)
 
 # --- 2) Lokale crises (apply only if Index_Ticker matches AND within interval)
 cr_local <- Crisis %>%

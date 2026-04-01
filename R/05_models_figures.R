@@ -441,12 +441,12 @@ library(modelsummary)
 library(kableExtra)
 
 O1 <- list(
-  "Market CAR" = m1.1_direction,
-  "FF CAR" = ff3_r1_direction,
-  "lagged CAR" = lag_m1_1_direction,
   "Market |CAR|" = m1.2_intensity,
   "FF |CAR|" = ff3_r1_intensity,
-  "lagged |CAR|" = lag_m1_2_intensity
+  "lagged |CAR|" = lag_m1_2_intensity,
+  "Market CAR" = m1.1_direction,
+  "FF CAR" = ff3_r1_direction,
+  "lagged CAR" = lag_m1_1_direction
 )
 # Genereer de tabel als 'markdown' (verschijnt in je console onderaan)
 modelsummary(O1, 
@@ -479,6 +479,7 @@ O2 <- list(
   "FF CAR interaction" = ff3_r2_tightness_interact,
   "lagged CAR interaction" = lag_m2_2_tightness_interaction
 )
+
 # Genereer de tabel als 'markdown' (verschijnt in je console onderaan)
 modelsummary(O2, 
              stars = TRUE, 
@@ -494,7 +495,7 @@ modelsummary(O2,
                
                # Interacties voor Model 2.2
                "Regulation:Tightness" = "Regulation × Tightness",
-               "Supervision:Tightness" = "Supervision × Tightness"),
+               "Tightness:Supervision" = "Supervision × Tightness"),
              gof_map = c("nobs", "r.squared", "adj.r.squared"))
 # Output in Viewer rechts onderaan
 modelsummary(O2, 
@@ -511,7 +512,7 @@ modelsummary(O2,
                
                # Interacties voor Model 2.2
                "Regulation:Tightness" = "Regulation × Tightness",
-               "Supervision:Tightness" = "Supervision × Tightness"),
+               "Tightness:Supervision" = "Supervision × Tightness"),
              gof_map = c("nobs", "r.squared", "adj.r.squared"))
 
 O3 <- list(
@@ -525,6 +526,7 @@ O3 <- list(
   "FF Triple CAR" = ff3_r3_triple_power,
   "Lagged Tripple CAR" = lag_m3_3_triple_power
 )
+
 # Genereer de tabel als 'markdown' (verschijnt in je console onderaan)
 modelsummary(O3, 
              stars = TRUE, 
@@ -541,14 +543,26 @@ modelsummary(O3,
                
                # Interacties voor Model 1 & 2
                "Regulation:Has_Supervisory_Power" = "Regulation × Power",
+               "Has_Supervisory_Power:Regulation" = "Regulation × Power",
+               
+               # Supervision x Power
                "Supervision:Has_Supervisory_Power" = "Supervision × Power",
+               "Has_Supervisory_Power:Supervision" = "Supervision × Power",
+               
+               # Tightness x Power
                "Tightness:Has_Supervisory_Power" = "Tightness × Power",
+               "Has_Supervisory_Power:Tightness" = "Tightness × Power",
+
                
                # Triple Interacties voor Model 3
-               "Supervision:Tightness" = "Supervision × Tightness",
                "Regulation:Tightness" = "Regulation × Tightness",
+               "Tightness:Regulation" = "Regulation × Tightness",
+               
+               # Supervision x Tightness
+               "Supervision:Tightness" = "Supervision × Tightness",
+               "Tightness:Supervision" = "Supervision × Tightness",
                "Supervision:Tightness:Has_Supervisory_Power" = "Supervision × Tightness × Power",
-               "Regulation:Tightness:Has_Supervisory_Power" = "Regulation × Tightness × Power"),
+               "Tightness:Has_Supervisory_Power:Regulation" = "Regulation × Tightness × Power"),
              gof_map = c("nobs", "r.squared", "adj.r.squared"))
 # Output in Viewer rechts onderaan
 modelsummary(O3, 
@@ -566,14 +580,26 @@ modelsummary(O3,
                
                # Interacties voor Model 1 & 2
                "Regulation:Has_Supervisory_Power" = "Regulation × Power",
+               "Has_Supervisory_Power:Regulation" = "Regulation × Power",
+               
+               # Supervision x Power
                "Supervision:Has_Supervisory_Power" = "Supervision × Power",
+               "Has_Supervisory_Power:Supervision" = "Supervision × Power",
+               
+               # Tightness x Power
                "Tightness:Has_Supervisory_Power" = "Tightness × Power",
+               "Has_Supervisory_Power:Tightness" = "Tightness × Power",
+               
                
                # Triple Interacties voor Model 3
-               "Supervision:Tightness" = "Supervision × Tightness",
                "Regulation:Tightness" = "Regulation × Tightness",
+               "Tightness:Regulation" = "Regulation × Tightness",
+               
+               # Supervision x Tightness
+               "Supervision:Tightness" = "Supervision × Tightness",
+               "Tightness:Supervision" = "Supervision × Tightness",
                "Supervision:Tightness:Has_Supervisory_Power" = "Supervision × Tightness × Power",
-               "Regulation:Tightness:Has_Supervisory_Power" = "Regulation × Tightness × Power"),
+               "Tightness:Has_Supervisory_Power:Regulation" = "Regulation × Tightness × Power"),
              gof_map = c("nobs", "r.squared", "adj.r.squared"))
 
 O4 <- list(
@@ -604,12 +630,26 @@ modelsummary(O4,
                
                # Interacties voor Model 4.1 & 4.2
                "Regulation:is_GSIB" = "Regulation × G-SIB",
+               "is_GSIB:Regulation" = "Regulation × G-SIB",
+               
+               # Supervision x G-SIB
                "Supervision:is_GSIB" = "Supervision × G-SIB",
+               "is_GSIB:Supervision" = "Supervision × G-SIB",
+               
+               # Tightness x G-SIB
                "Tightness:is_GSIB" = "Tightness × G-SIB",
+               "is_GSIB:Tightness" = "Tightness × G-SIB",
                
                # Triple Interacties voor Model 4.3 (Let op de volgorde van R!)
+               "Regulation:Tightness" = "Regulation × Tightness",
+               "Tightness:Regulation" = "Regulation × Tightness",
+               
+               # Supervision x Tightness
+               "Supervision:Tightness" = "Supervision × Tightness",
+               "Tightness:Supervision" = "Supervision × Tightness",
+               
                "Supervision:Tightness:is_GSIB" = "Supervision × Tightness × G-SIB",
-               "Regulation:Tightness:is_GSIB" = "Regulation × Tightness × G-SIB"),
+               "Tightness:is_GSIB:Regulation" = "Regulation × Tightness × G-SIB"),
           gof_map = c("nobs", "r.squared", "adj.r.squared"))
 # Output in Viewer rechts onderaan
 modelsummary(O4, 
@@ -627,12 +667,26 @@ modelsummary(O4,
                
                # Interacties voor Model 4.1 & 4.2
                "Regulation:is_GSIB" = "Regulation × G-SIB",
+               "is_GSIB:Regulation" = "Regulation × G-SIB",
+               
+               # Supervision x G-SIB
                "Supervision:is_GSIB" = "Supervision × G-SIB",
+               "is_GSIB:Supervision" = "Supervision × G-SIB",
+               
+               # Tightness x G-SIB
                "Tightness:is_GSIB" = "Tightness × G-SIB",
+               "is_GSIB:Tightness" = "Tightness × G-SIB",
                
                # Triple Interacties voor Model 4.3 (Let op de volgorde van R!)
+               "Regulation:Tightness" = "Regulation × Tightness",
+               "Tightness:Regulation" = "Regulation × Tightness",
+               
+               # Supervision x Tightness
+               "Supervision:Tightness" = "Supervision × Tightness",
+               "Tightness:Supervision" = "Supervision × Tightness",
+               
                "Supervision:Tightness:is_GSIB" = "Supervision × Tightness × G-SIB",
-               "Regulation:Tightness:is_GSIB" = "Regulation × Tightness × G-SIB"),
+               "Tightness:is_GSIB:Regulation" = "Regulation × Tightness × G-SIB"),
              gof_map = c("nobs", "r.squared", "adj.r.squared"))
 
 O5a <- list(
@@ -663,10 +717,25 @@ modelsummary(O5a,
                
                # Interacties voor Model 5.1 & 5.2
                "Regulation:crisis" = "Regulation × Crisis",
+               "crisis:Regulation" = "Regulation × Crisis",
+               
+               # Supervision x Crisis
                "Supervision:crisis" = "Supervision × Crisis",
+               "crisis:Supervision" = "Supervision × Crisis",
+               
+               # Tightness x Crisis
                "Tightness:crisis" = "Tightness × Crisis",
+               "crisis:Tightness" = "Tightness × Crisis",
+
                
                # Triple Interacties voor Model 5.3
+               "Regulation:Tightness" = "Regulation × Tightness",
+               "Tightness:Regulation" = "Regulation × Tightness",
+               
+               # Supervision x Tightness
+               "Supervision:Tightness" = "Supervision × Tightness",
+               "Tightness:Supervision" = "Supervision × Tightness",
+               
                "Supervision:Tightness:crisis" = "Supervision × Tightness × Crisis",
                "Tightness:crisis:Regulation" = "Regulation × Tightness × Crisis"),
              gof_map = c("nobs", "r.squared", "adj.r.squared"))
@@ -686,10 +755,25 @@ modelsummary(O5a,
                
                # Interacties voor Model 5.1 & 5.2
                "Regulation:crisis" = "Regulation × Crisis",
+               "crisis:Regulation" = "Regulation × Crisis",
+               
+               # Supervision x Crisis
                "Supervision:crisis" = "Supervision × Crisis",
+               "crisis:Supervision" = "Supervision × Crisis",
+               
+               # Tightness x Crisis
                "Tightness:crisis" = "Tightness × Crisis",
+               "crisis:Tightness" = "Tightness × Crisis",
+               
                
                # Triple Interacties voor Model 5.3
+               "Regulation:Tightness" = "Regulation × Tightness",
+               "Tightness:Regulation" = "Regulation × Tightness",
+               
+               # Supervision x Tightness
+               "Supervision:Tightness" = "Supervision × Tightness",
+               "Tightness:Supervision" = "Supervision × Tightness",
+               
                "Supervision:Tightness:crisis" = "Supervision × Tightness × Crisis",
                "Tightness:crisis:Regulation" = "Regulation × Tightness × Crisis"),
             gof_map = c("nobs", "r.squared", "adj.r.squared"))
@@ -722,10 +806,24 @@ modelsummary(O5b,
                
                # Interacties voor Model 5.4 & 5.5
                "Regulation:VIX_Level" = "Regulation × VIX",
+               "VIX_Level:Regulation" = "Regulation × VIX",
+               
+               # Supervision x VIX
                "Supervision:VIX_Level" = "Supervision × VIX",
+               "VIX_Level:Supervision" = "Supervision × VIX",
+               
+               # Tightness x VIX
                "Tightness:VIX_Level" = "Tightness × VIX",
+               "VIX_Level:Tightness" = "Tightness × VIX",
                
                # Triple Interacties voor Model 5.6
+               "Regulation:Tightness" = "Regulation × Tightness",
+               "Tightness:Regulation" = "Regulation × Tightness",
+               
+               # Supervision x Tightness
+               "Supervision:Tightness" = "Supervision × Tightness",
+               "Tightness:Supervision" = "Supervision × Tightness",
+               
                "Supervision:Tightness:VIX_Level" = "Supervision × Tightness × VIX",
                "Regulation:Tightness:VIX_Level" = "Regulation × Tightness × VIX"),
              gof_map = c("nobs", "r.squared", "adj.r.squared"))
@@ -746,10 +844,24 @@ modelsummary(O5b,
                
                # Interacties voor Model 5.4 & 5.5
                "Regulation:VIX_Level" = "Regulation × VIX",
+               "VIX_Level:Regulation" = "Regulation × VIX",
+               
+               # Supervision x VIX
                "Supervision:VIX_Level" = "Supervision × VIX",
+               "VIX_Level:Supervision" = "Supervision × VIX",
+               
+               # Tightness x VIX
                "Tightness:VIX_Level" = "Tightness × VIX",
+               "VIX_Level:Tightness" = "Tightness × VIX",
                
                # Triple Interacties voor Model 5.6
+               "Regulation:Tightness" = "Regulation × Tightness",
+               "Tightness:Regulation" = "Regulation × Tightness",
+               
+               # Supervision x Tightness
+               "Supervision:Tightness" = "Supervision × Tightness",
+               "Tightness:Supervision" = "Supervision × Tightness",
+               
                "Supervision:Tightness:VIX_Level" = "Supervision × Tightness × VIX",
                "Regulation:Tightness:VIX_Level" = "Regulation × Tightness × VIX"),
              gof_map = c("nobs", "r.squared", "adj.r.squared"))

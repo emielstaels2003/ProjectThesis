@@ -68,6 +68,7 @@ for(j in 1:nrow(Bank_Mapping)) {
           # Voeg andere variabelen toe naar behoefte
         )
         counter <- counter + 1
+        print(counter)
       }
     }
   }
@@ -149,3 +150,4 @@ table(final_esm_lagged_data$is_GSIB)
 
 # --- Absolute CAR
 final_esm_lagged_data$abs_CAR <- abs(final_esm_lagged_data$CAR)
+

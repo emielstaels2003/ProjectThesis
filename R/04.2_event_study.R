@@ -113,7 +113,7 @@ for(j in 1:nrow(Bank_Mapping)) {
 }
 
 final_esm_data_FF3 <- bind_rows(results_list)
-View(final_esm_data_FF3)
+#View(final_esm_data_FF3)
 
 final_esm_data_FF3 <- final_esm_data_FF3 %>%
   mutate(SpeechDate = as.Date(SpeechDate),

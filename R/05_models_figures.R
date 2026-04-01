@@ -182,120 +182,6 @@ m5.6_vix_triple <- feols(CAR ~ Supervision * Tightness * VIX_Level +
 
 summary(m5.6_vix_triple)
 
-# SAMENVATTENDE TABEL VAN ALLE RESULTATEN
-
-library(modelsummary)
-library(kableExtra)
-
-O1 <- list(
-  "Market CAR" = m1.1_direction,
-  "FF CAR" = ff3_r1_direction,
-  "lagged CAR" = lag_m1_1_direction,
-  "Market |CAR|" = m1.2_intensity,
-  "FF |CAR|" = ff3_r1_intensity,
-  "lagged |CAR|" = lag_m1_2_intensity
-)
-# Genereer de tabel als 'markdown' (verschijnt in je console onderaan)
-modelsummary(O1, 
-             stars = TRUE, 
-             output = "markdown",
-             fmt = 4,
-             coef_map = c("Regulation" = "Regulation", 
-                          "Supervision" = "Supervision",
-                          "ROA" = "ROA",
-                          "log(TotalAssets)" = "Total Assets (log)",
-                          "CapProxy" = "Capital Proxy"),
-             gof_map = c("nobs", "r.squared", "adj.r.squared"))
-# Output in Viewer rechts onderaan
-modelsummary(O1, 
-             stars = TRUE, 
-             output = "kableExtra",
-             fmt = 4, 
-             coef_map = c("Regulation" = "Regulation", 
-                          "Supervision" = "Supervision",
-                          "ROA" = "ROA",
-                          "log(TotalAssets)" = "Bank size (log)",
-                          "CapProxy" = "Capital Proxy"),
-             gof_map = c("nobs", "r.squared", "adj.r.squared"))
-
-O2 <- list(
-  "Market CAR" = m2.1_tightness,
-  "FF CAR" = ff3_r2_tightness,
-  "lagged CAR" = lag_m2_1_tightness,
-  "Market CAR interaction" = m2.2_tightness_interaction,
-  "FF CAR interaction" = ff3_r2_tightness_interact,
-  "lagged CAR interaction" = lag_m2_2_tightness_interaction
-)
-# Genereer de tabel als 'markdown' (verschijnt in je console onderaan)
-modelsummary(O2, 
-             stars = TRUE, 
-             output = "markdown",
-             fmt = 4,
-             coef_map = c("Regulation" = "Regulation", 
-                          "Supervision" = "Supervision",
-                          "Tightness" = "Tightness",
-                          "ROA" = "ROA",
-                          "log(TotalAssets)" = "Total Assets (log)",
-                          "CapProxy" = "Capital Proxy"),
-             gof_map = c("nobs", "r.squared", "adj.r.squared"))
-# Output in Viewer rechts onderaan
-modelsummary(O2, 
-             stars = TRUE, 
-             output = "kableExtra",
-             fmt = 4, 
-             coef_map = c("Regulation" = "Regulation", 
-                          "Supervision" = "Supervision",
-                          "Tightness" = "Tightness",
-                          "ROA" = "ROA",
-                          "log(TotalAssets)" = "Bank size (log)",
-                          "CapProxy" = "Capital Proxy"),
-             gof_map = c("nobs", "r.squared", "adj.r.squared"))
-
-
-modellen_h1 <- list(
-  "M1.1 (CAR)" = m1.1_direction,
-  "M1.2 (|CAR|)" = m1.2_intensity,
-  "M2.1 (CAR)" = m2.1_tightness,
-  "M2.2 (CAR)" = m2.2_tightness_interaction,
-  "M3.1 (|CAR|)" = m3.1_power_intensity,
-  "M3.2 (CAR)" = m3.2_power_direction,
-  "M3.3 (CAR)" = m3.3_triple_power,
-  "M4.1 (|CAR|)" = m4.1_gsib_intensity,
-  "M4.2 (CAR)" = m4.2_gsib_direction,
-  "M4.3 (CAR)" = m4.3_triple_gsib,
-  "M5.1 (|CAR|)" = m5.1_crisis_relevance,
-  "M5.2 (CAR)" = m5.2_crisis_sensitivity,
-  "M5.3 (CAR)" = m5.3_crisis_triple,
-  "M5.4 (|CAR|)" = m5.4_vix_relevance,
-  "M5.5 (CAR)" = m5.5_vix_sensitivity,
-  "M5.6 (CAR)" = m5.6_vix_triple
-)
-
-# Genereer de tabel als 'markdown' (verschijnt in je console onderaan)
-modelsummary(modellen_h1, 
-             stars = TRUE, 
-             output = "markdown",
-             fmt = 4,
-             coef_map = c("Regulation" = "Regulation", 
-                          "Supervision" = "Supervision",
-                          "ROA" = "ROA",
-                          "log(TotalAssets)" = "Bank size (log)",
-                          "CapProxy" = "Capital Proxy"),
-             gof_map = c("nobs", "r.squared", "adj.r.squared"))
-
-
-# Output in Viewer rechts onderaan
-modelsummary(modellen_h1, 
-             stars = TRUE, 
-             output = "kableExtra",
-             fmt = 4, 
-             coef_map = c("Regulation" = "Regulation", 
-                          "Supervision" = "Supervision",
-                          "ROA" = "ROA",
-                          "log(TotalAssets)" = "Bank size (log)",
-                          "CapProxy" = "Capital Proxy"),
-             gof_map = c("nobs", "r.squared", "adj.r.squared"))
-
 ########## OBV FAMA FRENCH
 
 # ONDERZOEKSVRAAG 1
@@ -548,4 +434,324 @@ lag_m5_6_vix_triple <- feols(CAR ~ Supervision * Tightness * VIX_Level +
                              data = final_esm_lagged_data)
 
 summary(lag_m5_6_vix_triple)
+
+# SAMENVATTENDE TABEL VAN ALLE RESULTATEN PER ONDERZOEKSVRAAG
+
+library(modelsummary)
+library(kableExtra)
+
+O1 <- list(
+  "Market CAR" = m1.1_direction,
+  "FF CAR" = ff3_r1_direction,
+  "lagged CAR" = lag_m1_1_direction,
+  "Market |CAR|" = m1.2_intensity,
+  "FF |CAR|" = ff3_r1_intensity,
+  "lagged |CAR|" = lag_m1_2_intensity
+)
+# Genereer de tabel als 'markdown' (verschijnt in je console onderaan)
+modelsummary(O1, 
+             stars = TRUE, 
+             output = "markdown",
+             fmt = 4,
+             coef_map = c("Regulation" = "Regulation", 
+                          "Supervision" = "Supervision",
+                          "ROA" = "ROA",
+                          "log(TotalAssets)" = "Total Assets (log)",
+                          "CapProxy" = "Capital Proxy"),
+             gof_map = c("nobs", "r.squared", "adj.r.squared"))
+# Output in Viewer rechts onderaan
+modelsummary(O1, 
+             stars = TRUE, 
+             output = "kableExtra",
+             fmt = 4, 
+             coef_map = c("Regulation" = "Regulation", 
+                          "Supervision" = "Supervision",
+                          "ROA" = "ROA",
+                          "log(TotalAssets)" = "Bank size (log)",
+                          "CapProxy" = "Capital Proxy"),
+             gof_map = c("nobs", "r.squared", "adj.r.squared"))
+
+O2 <- list(
+  "Market CAR" = m2.1_tightness,
+  "FF CAR" = ff3_r2_tightness,
+  "lagged CAR" = lag_m2_1_tightness,
+  "Market CAR interaction" = m2.2_tightness_interaction,
+  "FF CAR interaction" = ff3_r2_tightness_interact,
+  "lagged CAR interaction" = lag_m2_2_tightness_interaction
+)
+# Genereer de tabel als 'markdown' (verschijnt in je console onderaan)
+modelsummary(O2, 
+             stars = TRUE, 
+             output = "markdown",
+             fmt = 4,
+             coef_map = c(
+               "Regulation" = "Regulation",
+               "Supervision" = "Supervision",
+               "Tightness" = "Tightness (Tone)",
+               "ROA" = "ROA",
+               "log(TotalAssets)" = "Bank size (log)",
+               "CapProxy" = "Capital Proxy",
+               
+               # Interacties voor Model 2.2
+               "Regulation:Tightness" = "Regulation × Tightness",
+               "Supervision:Tightness" = "Supervision × Tightness"),
+             gof_map = c("nobs", "r.squared", "adj.r.squared"))
+# Output in Viewer rechts onderaan
+modelsummary(O2, 
+             stars = TRUE, 
+             output = "kableExtra",
+             fmt = 4, 
+             coef_map = c(
+               "Regulation" = "Regulation",
+               "Supervision" = "Supervision",
+               "Tightness" = "Tightness (Tone)",
+               "ROA" = "ROA",
+               "log(TotalAssets)" = "Bank size (log)",
+               "CapProxy" = "Capital Proxy",
+               
+               # Interacties voor Model 2.2
+               "Regulation:Tightness" = "Regulation × Tightness",
+               "Supervision:Tightness" = "Supervision × Tightness"),
+             gof_map = c("nobs", "r.squared", "adj.r.squared"))
+
+O3 <- list(
+  "Market |CAR|" = m3.1_power_intensity,
+  "FF |CAR|" = ff3_r3_power_intensity,
+  "lagged |CAR|" = lag_m3_1_power_intensity,
+  "Market Double CAR" = m3.2_power_direction,
+  "FF Double CAR" = ff3_r3_power_direction,
+  "Lagged Double CAR" = lag_m3_2_power_direction,
+  "Market Triple CAR" = m3.3_triple_power,
+  "FF Triple CAR" = ff3_r3_triple_power,
+  "Lagged Tripple CAR" = lag_m3_3_triple_power
+)
+# Genereer de tabel als 'markdown' (verschijnt in je console onderaan)
+modelsummary(O3, 
+             stars = TRUE, 
+             output = "markdown",
+             fmt = 4,
+             coef_map = c(
+               "Regulation" = "Regulation",
+               "Supervision" = "Supervision",
+               "Has_Supervisory_Power" = "Supervisory Power (Dummy)",
+               "Tightness" = "Tightness (Tone)",
+               "ROA" = "ROA",
+               "log(TotalAssets)" = "Bank size (log)",
+               "CapProxy" = "Capital Proxy",
+               
+               # Interacties voor Model 1 & 2
+               "Regulation:Has_Supervisory_Power" = "Regulation × Power",
+               "Supervision:Has_Supervisory_Power" = "Supervision × Power",
+               "Tightness:Has_Supervisory_Power" = "Tightness × Power",
+               
+               # Triple Interacties voor Model 3
+               "Supervision:Tightness" = "Supervision × Tightness",
+               "Regulation:Tightness" = "Regulation × Tightness",
+               "Supervision:Tightness:Has_Supervisory_Power" = "Supervision × Tightness × Power",
+               "Regulation:Tightness:Has_Supervisory_Power" = "Regulation × Tightness × Power"),
+             gof_map = c("nobs", "r.squared", "adj.r.squared"))
+# Output in Viewer rechts onderaan
+modelsummary(O3, 
+             stars = TRUE, 
+             output = "kableExtra",
+             fmt = 4, 
+             coef_map = c(
+               "Regulation" = "Regulation",
+               "Supervision" = "Supervision",
+               "Has_Supervisory_Power" = "Supervisory Power (Dummy)",
+               "Tightness" = "Tightness (Tone)",
+               "ROA" = "ROA",
+               "log(TotalAssets)" = "Bank size (log)",
+               "CapProxy" = "Capital Proxy",
+               
+               # Interacties voor Model 1 & 2
+               "Regulation:Has_Supervisory_Power" = "Regulation × Power",
+               "Supervision:Has_Supervisory_Power" = "Supervision × Power",
+               "Tightness:Has_Supervisory_Power" = "Tightness × Power",
+               
+               # Triple Interacties voor Model 3
+               "Supervision:Tightness" = "Supervision × Tightness",
+               "Regulation:Tightness" = "Regulation × Tightness",
+               "Supervision:Tightness:Has_Supervisory_Power" = "Supervision × Tightness × Power",
+               "Regulation:Tightness:Has_Supervisory_Power" = "Regulation × Tightness × Power"),
+             gof_map = c("nobs", "r.squared", "adj.r.squared"))
+
+O4 <- list(
+  "Market |CAR|" = m4.1_gsib_intensity,
+  "FF |CAR|" = ff3_r4_gsib_intensity,
+  "lagged |CAR|" = lag_m4_1_gsib_intensity,
+  "Market Double CAR" = m4.2_gsib_direction,
+  "FF Double CAR" = ff3_r4_gsib_direction,
+  "Lagged Double CAR" = lag_m4_2_gsib_direction,
+  "Market Triple CAR" = m4.3_triple_gsib,
+  "FF Triple CAR" = ff3_r4_triple_gsib,
+  "Lagged Tripple CAR" = lag_m4_3_triple_gsib
+)
+
+# Genereer de tabel als 'markdown' (verschijnt in je console onderaan)
+modelsummary(O4, 
+             stars = TRUE, 
+             output = "markdown",
+             fmt = 4,
+             coef_map = c(
+               "Regulation" = "Regulation",
+               "Supervision" = "Supervision",
+               "is_GSIB" = "G-SIB Status (Dummy)",
+               "Tightness" = "Tightness (Tone)",
+               "ROA" = "ROA",
+               "log(TotalAssets)" = "Bank size (log)",
+               "CapProxy" = "Capital Proxy",
+               
+               # Interacties voor Model 4.1 & 4.2
+               "Regulation:is_GSIB" = "Regulation × G-SIB",
+               "Supervision:is_GSIB" = "Supervision × G-SIB",
+               "Tightness:is_GSIB" = "Tightness × G-SIB",
+               
+               # Triple Interacties voor Model 4.3 (Let op de volgorde van R!)
+               "Supervision:Tightness:is_GSIB" = "Supervision × Tightness × G-SIB",
+               "Regulation:Tightness:is_GSIB" = "Regulation × Tightness × G-SIB"),
+          gof_map = c("nobs", "r.squared", "adj.r.squared"))
+# Output in Viewer rechts onderaan
+modelsummary(O4, 
+             stars = TRUE, 
+             output = "kableExtra",
+             fmt = 4, 
+             coef_map = c(
+               "Regulation" = "Regulation",
+               "Supervision" = "Supervision",
+               "is_GSIB" = "G-SIB Status (Dummy)",
+               "Tightness" = "Tightness (Tone)",
+               "ROA" = "ROA",
+               "log(TotalAssets)" = "Bank size (log)",
+               "CapProxy" = "Capital Proxy",
+               
+               # Interacties voor Model 4.1 & 4.2
+               "Regulation:is_GSIB" = "Regulation × G-SIB",
+               "Supervision:is_GSIB" = "Supervision × G-SIB",
+               "Tightness:is_GSIB" = "Tightness × G-SIB",
+               
+               # Triple Interacties voor Model 4.3 (Let op de volgorde van R!)
+               "Supervision:Tightness:is_GSIB" = "Supervision × Tightness × G-SIB",
+               "Regulation:Tightness:is_GSIB" = "Regulation × Tightness × G-SIB"),
+             gof_map = c("nobs", "r.squared", "adj.r.squared"))
+
+O5a <- list(
+  "Market |CAR|" = m5.1_crisis_relevance,
+  "FF |CAR|" = ff3_r5_crisis_relevance,
+  "lagged |CAR|" = lag_m5_1_crisis_relevance,
+  "Market Double CAR" = m5.2_crisis_sensitivity,
+  "FF Double CAR" = ff3_r5_crisis_sensitivity,
+  "Lagged Double CAR" = lag_m5_2_crisis_sensitivity,
+  "Market Triple CAR" = m5.3_crisis_triple,
+  "FF Triple CAR" = ff3_r5_crisis_triple,
+  "Lagged Tripple CAR" = lag_m5_3_crisis_triple
+)
+
+# Genereer de tabel als 'markdown' (verschijnt in je console onderaan)
+modelsummary(O5a, 
+             stars = TRUE, 
+             output = "markdown",
+             fmt = 4,
+             coef_map = c(
+               "Regulation" = "Regulation",
+               "Supervision" = "Supervision",
+               "crisis" = "Crisis (Dummy)",
+               "Tightness" = "Tightness (Tone)",
+               "ROA" = "ROA",
+               "log(TotalAssets)" = "Bank size (log)",
+               "CapProxy" = "Capital Proxy",
+               
+               # Interacties voor Model 5.1 & 5.2
+               "Regulation:crisis" = "Regulation × Crisis",
+               "Supervision:crisis" = "Supervision × Crisis",
+               "Tightness:crisis" = "Tightness × Crisis",
+               
+               # Triple Interacties voor Model 5.3
+               "Supervision:Tightness:crisis" = "Supervision × Tightness × Crisis",
+               "Tightness:crisis:Regulation" = "Regulation × Tightness × Crisis"),
+             gof_map = c("nobs", "r.squared", "adj.r.squared"))
+# Output in Viewer rechts onderaan
+modelsummary(O5a, 
+             stars = TRUE, 
+             output = "kableExtra",
+             fmt = 4, 
+             coef_map = c(
+               "Regulation" = "Regulation",
+               "Supervision" = "Supervision",
+               "crisis" = "Crisis (Dummy)",
+               "Tightness" = "Tightness (Tone)",
+               "ROA" = "ROA",
+               "log(TotalAssets)" = "Bank size (log)",
+               "CapProxy" = "Capital Proxy",
+               
+               # Interacties voor Model 5.1 & 5.2
+               "Regulation:crisis" = "Regulation × Crisis",
+               "Supervision:crisis" = "Supervision × Crisis",
+               "Tightness:crisis" = "Tightness × Crisis",
+               
+               # Triple Interacties voor Model 5.3
+               "Supervision:Tightness:crisis" = "Supervision × Tightness × Crisis",
+               "Tightness:crisis:Regulation" = "Regulation × Tightness × Crisis"),
+            gof_map = c("nobs", "r.squared", "adj.r.squared"))
+
+O5b <- list(
+  "Market |CAR|" = m5.4_vix_relevance,
+  "FF |CAR|" = ff3_r5_vix_relevance,
+  "lagged |CAR|" = lag_m5_4_vix_relevance,
+  "Market Double CAR" = m5.5_vix_sensitivity,
+  "FF Double CAR" = ff3_r5_vix_sensitivity,
+  "Lagged Double CAR" = lag_m5_5_vix_sensitivity,
+  "Market Triple CAR" = m5.6_vix_triple,
+  "FF Triple CAR" = ff3_r5_vix_triple,
+  "Lagged Tripple CAR" = lag_m5_6_vix_triple
+)
+
+# Genereer de tabel als 'markdown' (verschijnt in je console onderaan)
+modelsummary(O5b, 
+             stars = TRUE, 
+             output = "markdown",
+             fmt = 4,
+             coef_map = c(
+               "Regulation" = "Regulation",
+               "Supervision" = "Supervision",
+               "VIX_Level" = "VIX Index",
+               "Tightness" = "Tightness (Tone)",
+               "ROA" = "ROA",
+               "log(TotalAssets)" = "Bank size (log)",
+               "CapProxy" = "Capital Proxy",
+               
+               # Interacties voor Model 5.4 & 5.5
+               "Regulation:VIX_Level" = "Regulation × VIX",
+               "Supervision:VIX_Level" = "Supervision × VIX",
+               "Tightness:VIX_Level" = "Tightness × VIX",
+               
+               # Triple Interacties voor Model 5.6
+               "Supervision:Tightness:VIX_Level" = "Supervision × Tightness × VIX",
+               "Regulation:Tightness:VIX_Level" = "Regulation × Tightness × VIX"),
+             gof_map = c("nobs", "r.squared", "adj.r.squared"))
+
+# Output in Viewer rechts onderaan
+modelsummary(O5b, 
+             stars = TRUE, 
+             output = "kableExtra",
+             fmt = 4, 
+             coef_map = c(
+               "Regulation" = "Regulation",
+               "Supervision" = "Supervision",
+               "VIX_Level" = "VIX Index",
+               "Tightness" = "Tightness (Tone)",
+               "ROA" = "ROA",
+               "log(TotalAssets)" = "Bank size (log)",
+               "CapProxy" = "Capital Proxy",
+               
+               # Interacties voor Model 5.4 & 5.5
+               "Regulation:VIX_Level" = "Regulation × VIX",
+               "Supervision:VIX_Level" = "Supervision × VIX",
+               "Tightness:VIX_Level" = "Tightness × VIX",
+               
+               # Triple Interacties voor Model 5.6
+               "Supervision:Tightness:VIX_Level" = "Supervision × Tightness × VIX",
+               "Regulation:Tightness:VIX_Level" = "Regulation × Tightness × VIX"),
+             gof_map = c("nobs", "r.squared", "adj.r.squared"))
+
 

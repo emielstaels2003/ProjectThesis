@@ -825,7 +825,7 @@ modelsummary(O5b,
                "Tightness:Supervision" = "Supervision × Tightness",
                
                "Supervision:Tightness:VIX_Level" = "Supervision × Tightness × VIX",
-               "Regulation:Tightness:VIX_Level" = "Regulation × Tightness × VIX"),
+               "Tightness:VIX_Level:Regulation" = "Regulation × Tightness × VIX"),
              gof_map = c("nobs", "r.squared", "adj.r.squared"))
 
 # Output in Viewer rechts onderaan
@@ -863,7 +863,7 @@ modelsummary(O5b,
                "Tightness:Supervision" = "Supervision × Tightness",
                
                "Supervision:Tightness:VIX_Level" = "Supervision × Tightness × VIX",
-               "Regulation:Tightness:VIX_Level" = "Regulation × Tightness × VIX"),
+               "Tightness:VIX_Level:Regulation" = "Regulation × Tightness × VIX"),
              gof_map = c("nobs", "r.squared", "adj.r.squared"))
 
 

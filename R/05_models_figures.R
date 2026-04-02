@@ -106,7 +106,7 @@ m3.3_triple_power <- feols(CAR ~ Supervision * Tightness * Has_Supervisory_Power
                                 ROA + log(TotalAssets) + CapProxy | 
                                 Ticker + year_month, 
                               data = final_esm_data)
-summary(m3.3_power_direction)
+summary(m3.3_triple_power)
 
 # ONDERZOEKSVRAAG 4
 

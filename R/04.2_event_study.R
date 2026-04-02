@@ -38,7 +38,7 @@ final_esm_data_FF3 <- final_esm_data %>%
 
 #FF model toepassen
 
-results_list <- list()
+results_list_FF <- list()
 counter <- 1
 
 for(j in 1:nrow(Bank_Mapping)) {
@@ -89,7 +89,7 @@ for(j in 1:nrow(Bank_Mapping)) {
         
         ev_df$AR <- ev_df$R_bank_excess - predict(fit, newdata = ev_df)
         
-        results_list[[counter]] <- data.frame(
+        results_list_FF[[counter]] <- data.frame(
           Ticker          = curr_bank,
           CentralBank     = curr_cb,
           Index_Ticker    = curr_index,
@@ -112,7 +112,7 @@ for(j in 1:nrow(Bank_Mapping)) {
   }
 }
 
-final_esm_data_FF3 <- bind_rows(results_list)
+final_esm_data_FF3 <- bind_rows(results_list_FF)
 #View(final_esm_data_FF3)
 
 final_esm_data_FF3 <- final_esm_data_FF3 %>%

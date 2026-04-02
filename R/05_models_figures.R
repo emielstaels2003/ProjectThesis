@@ -354,6 +354,7 @@ lag_m3_2_power_direction <- feols(CAR ~ Regulation * Has_Supervisory_Power +
                                   data = final_esm_lagged_data)
 summary(lag_m3_2_power_direction)
 
+
 lag_m3_3_triple_power <- feols(CAR ~ Supervision * Tightness * Has_Supervisory_Power + 
                                  Regulation * Tightness * Has_Supervisory_Power +
                                  ROA + log(TotalAssets) + CapProxy | 

@@ -63,6 +63,9 @@ m1.1_direction <- feols(CAR ~ Regulation + Supervision +
                            Ticker + year_month, 
                          data = final_esm_data)
 summary(m1.1_direction)
+library(fixest)
+wald(m1.1_direction, keep = c("Regulation", "Supervision"))
+
 
 m1.2_intensity <- feols(abs_CAR ~ Regulation + Supervision + 
                            ROA + log(TotalAssets) + CapProxy | 
@@ -77,7 +80,7 @@ m2.1_tightness <- feols(CAR ~ Regulation + Supervision + Tightness +
                           Ticker + year_month, 
                         data = final_esm_data)
 summary(m2.1_tightness)
-
+wald(m2.1_tightness, keep = "Regulation|Supervision|Tightness")
 m2.2_tightness_interaction <- feols(CAR ~ Regulation * Tightness + Supervision * Tightness +
                             ROA + log(TotalAssets) + CapProxy | 
                             Ticker + year_month, 
@@ -978,12 +981,13 @@ doc <- body_add_par(
 doc <- body_add_flextable(doc, ft_corr)
 
 print(doc, target = "correlation_matrix.docx")
-#time series rob
+# time series rob
 library(dplyr)
 library(tidyr)
 library(ggplot2)
+library(zoo)
 
-# STEP 1: create monthly time-series data
+# STEP 1: prepare monthly time-series data
 ts_data <- final_esm_data %>%
   mutate(
     year_month = as.Date(paste0(year_month, "-01"))
@@ -995,29 +999,37 @@ ts_data <- final_esm_data %>%
     crisis_month = max(crisis, na.rm = TRUE),
     .groups = "drop"
   ) %>%
+  arrange(year_month)
+
+# STEP 2: compute 6-month moving averages and standardise
+ts_data <- ts_data %>%
   mutate(
-    CAR_index = as.numeric(scale(avg_CAR)),
-    Comm_index = as.numeric(scale(avg_comm_intensity))
+    avg_CAR_ma6 = zoo::rollmean(avg_CAR, k = 6, fill = NA, align = "right"),
+    avg_comm_ma6 = zoo::rollmean(avg_comm_intensity, k = 6, fill = NA, align = "right"),
+    CAR_index = as.numeric(scale(avg_CAR_ma6)),
+    Comm_index = as.numeric(scale(avg_comm_ma6))
   )
 
-# STEP 2: build shaded crisis periods
+# STEP 3: create crisis groups for shading
 ts_data <- ts_data %>%
-  arrange(year_month) %>%
   mutate(
     crisis_change = crisis_month != lag(crisis_month, default = first(crisis_month)),
     crisis_group = cumsum(crisis_change)
   )
 
+# STEP 4: create crisis shading periods
 crisis_periods <- ts_data %>%
   filter(crisis_month == 1) %>%
   group_by(crisis_group) %>%
   summarise(
     xmin = min(year_month),
     xmax = max(year_month),
+    duration = as.numeric(difftime(max(year_month), min(year_month), units = "days")) / 30,
     .groups = "drop"
-  )
+  ) %>%
+  filter(duration >= 3)
 
-# STEP 3: reshape data for plotting
+# STEP 5: reshape for plotting
 ts_plot_data <- ts_data %>%
   select(year_month, CAR_index, Comm_index) %>%
   pivot_longer(
@@ -1033,90 +1045,56 @@ ts_plot_data <- ts_data %>%
     )
   )
 
-# STEP 4: plot with crisis shading
+# STEP 6: plot
 ggplot() +
   geom_rect(
     data = crisis_periods,
-    aes(xmin = xmin, xmax = xmax, ymin = -Inf, ymax = Inf),
+    aes(
+      xmin = xmin,
+      xmax = xmax,
+      ymin = -Inf,
+      ymax = Inf,
+      fill = "Crisis period"
+    ),
     inherit.aes = FALSE,
-    fill = "grey80",
-    alpha = 0.5
+    alpha = 0.15
   ) +
-  geom_line(
-    data = ts_plot_data %>% filter(Series == "Average abnormal returns"),
-    aes(x = year_month, y = Value, color = Series),
-    linewidth = 0.9
-  ) +
-  geom_line(
-    data = ts_plot_data %>% filter(Series == "Communication intensity"),
-    aes(x = year_month, y = Value, color = Series),
-    linewidth = 0.9
-  ) +
-  scale_color_manual(
-    values = c(
-      "Average abnormal returns" = "steelblue",
-      "Communication intensity" = "firebrick"
-    )
-  ) +
-  labs(
-    x = NULL,
-    y = "Standardised monthly average",
-    color = NULL,
-    title = "Evolution of average abnormal returns and communication intensity over time"
-  ) +
-  scale_x_date(date_labels = "%Y", date_breaks = "1 year") +
-  theme_minimal() +
-  theme(
-    legend.position = "bottom",
-    axis.text.x = element_text(angle = 45, hjust = 1),
-    panel.grid.minor = element_blank()
-  )
-ggplot() +
-  # Crisis shading WITH legend
-  geom_rect(
-    data = crisis_periods,
-    aes(xmin = xmin, xmax = xmax, ymin = -Inf, ymax = Inf, fill = "Crisis period"),
-    inherit.aes = FALSE,
-    alpha = 0.3
-  ) +
-  
-  # CAR line
   geom_line(
     data = ts_plot_data %>% filter(Series == "Average abnormal returns"),
     aes(x = year_month, y = Value, color = "Average abnormal returns"),
-    linewidth = 0.9
+    linewidth = 1.1,
+    na.rm = TRUE
   ) +
-  
-  # Communication line
   geom_line(
     data = ts_plot_data %>% filter(Series == "Communication intensity"),
     aes(x = year_month, y = Value, color = "Communication intensity"),
-    linewidth = 0.9
+    linewidth = 1.1,
+    na.rm = TRUE
   ) +
-  
-  # Color scale (lines)
   scale_color_manual(
     values = c(
       "Average abnormal returns" = "steelblue",
       "Communication intensity" = "firebrick"
     )
   ) +
-  
-  # Fill scale (crisis shading)
   scale_fill_manual(
-    values = c("at least one relevant crisis affecting the sample" = "grey70")
+    values = c("Crisis period" = "grey70")
   ) +
-  
   labs(
     x = NULL,
-    y = "Standardised monthly average",
+    y = "Standardised 6-month moving average",
     color = NULL,
     fill = NULL,
     title = "Evolution of average abnormal returns and communication intensity over time"
   ) +
-  
-  scale_x_date(date_labels = "%Y", date_breaks = "1 year") +
-  
+  scale_x_date(
+    date_labels = "%Y",
+    date_breaks = "2 years"
+  ) +
+  guides(
+    color = guide_legend(order = 1),
+    fill = guide_legend(order = 2)
+  ) +
   theme_minimal() +
   theme(
     legend.position = "bottom",

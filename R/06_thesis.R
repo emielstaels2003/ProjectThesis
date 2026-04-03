@@ -480,3 +480,83 @@ ggplot(plot_data, aes(x = year_val, fill = Presence)) +
     strip.text = element_text(face = "bold", size = 9)
   )
 
+#summary statistics
+
+library(dplyr)
+library(tidyr)
+
+summary_stats <- final_esm_data %>%
+  mutate(log_TA = log(TotalAssets)) %>%
+  select(CAR, abs_CAR, Regulation, Supervision, Tightness,
+         ROA, log_TA, CapProxy) %>%
+  mutate(across(everything(), as.numeric)) %>%
+  summarise(across(
+    everything(),
+    list(
+      Mean   = ~mean(., na.rm = TRUE),
+      SD     = ~sd(., na.rm = TRUE),
+      Min    = ~min(., na.rm = TRUE),
+      Median = ~median(., na.rm = TRUE),
+      Max    = ~max(., na.rm = TRUE),
+      N      = ~sum(!is.na(.))
+    ),
+    .names = "{.col}___{.fn}"
+  )) %>%
+  pivot_longer(
+    cols = everything(),
+    names_to = c("Variable", ".value"),
+    names_sep = "___"
+  )
+
+summary_stats
+library(dplyr)
+
+summary_stats_clean <- summary_stats %>%
+  mutate(
+    Variable = recode(
+      Variable,
+      "CAR" = "CAR",
+      "abs_CAR" = "Absolute CAR",
+      "Regulation" = "Regulation",
+      "Supervision" = "Supervision",
+      "Tightness" = "Tightness",
+      "ROA" = "ROA",
+      "log_TA" = "Log Total Assets",
+      "CapProxy" = "Capital Ratio Proxy"
+    )
+  )
+
+summary_stats_clean
+library(flextable)
+summary_stats_clean <- summary_stats_clean %>%
+  mutate(
+    Mean = round(Mean, 3),
+    SD = round(SD, 3),
+    Min = round(Min, 3),
+    Median = round(Median, 3),
+    Max = round(Max, 3)
+  )
+
+ft <- flextable(summary_stats_clean)
+ft <- autofit(ft)
+ft <- theme_booktabs(ft)
+ft <- align(ft, align = "center", part = "all")
+ft <- bold(ft, part = "header")
+ft
+library(flextable)
+
+ft <- flextable(summary_stats_clean)
+
+ft <- colformat_num(
+  ft,
+  big.mark = "",   # removes comma in 1,000
+  decimal.mark = ".", 
+  digits = 3
+)
+
+ft <- autofit(ft)
+ft <- theme_booktabs(ft)
+ft <- align(ft, align = "center", part = "all")
+ft <- bold(ft, part = "header")
+
+ft

@@ -867,4 +867,260 @@ modelsummary(O5b,
                "Tightness:VIX_Level:Regulation" = "Regulation × Tightness × VIX"),
              gof_map = c("nobs", "r.squared", "adj.r.squared"))
 
+#corrmatrix
+library(dplyr)
+library(tibble)
+
+corr_data <- final_esm_data %>%
+  mutate(log_TA = log(TotalAssets)) %>%
+  select(CAR, abs_CAR, Regulation, Supervision, Tightness,
+         ROA, log_TA, CapProxy) %>%
+  mutate(across(everything(), as.numeric))
+
+cor_matrix <- cor(corr_data, use = "pairwise.complete.obs")
+cor_matrix <- round(cor_matrix, 2)
+cor_matrix_lower <- cor_matrix
+cor_matrix_lower[upper.tri(cor_matrix_lower)] <- NA
+
+cor_table <- as.data.frame(cor_matrix_lower)
+cor_table <- rownames_to_column(cor_table, var = "")
+
+cor_table[is.na(cor_table)] <- "-"
+
+cor_long <- cor_long %>%
+  mutate(
+    RowVar = factor(RowVar, levels = rev(rownames(cor_matrix))),
+    ColVar = factor(ColVar, levels = colnames(cor_matrix))
+  )
+
+library(dplyr)
+library(tidyr)
+library(tibble)
+library(ggplot2)
+library(flextable)
+library(officer)
+
+# STEP 1: prepare correlation data
+corr_data <- final_esm_data %>%
+  mutate(log_TA = log(TotalAssets)) %>%
+  select(CAR, abs_CAR, Regulation, Supervision, Tightness,
+         ROA, log_TA, CapProxy) %>%
+  mutate(across(everything(), as.numeric))
+
+# STEP 2: compute correlation matrix
+cor_matrix <- cor(corr_data, use = "pairwise.complete.obs")
+cor_matrix <- round(cor_matrix, 2)
+sprintf("%.2f", cor_matrix)
+
+# STEP 3: assign clean variable names
+clean_names <- c("CAR", "Absolute CAR", "Regulation", "Supervision",
+                 "Tightness", "ROA", "Log Total Assets", "Capital Ratio Proxy")
+
+colnames(cor_matrix) <- clean_names
+rownames(cor_matrix) <- clean_names
+
+# STEP 4: create lower-triangle version for plot and table
+cor_matrix_lower <- cor_matrix
+cor_matrix_lower[upper.tri(cor_matrix_lower)] <- NA
+
+# STEP 5: create long format for plotting
+cor_long <- as.data.frame(cor_matrix_lower) %>%
+  rownames_to_column(var = "RowVar") %>%
+  pivot_longer(
+    cols = -RowVar,
+    names_to = "ColVar",
+    values_to = "Correlation"
+  ) %>%
+  mutate(
+    RowVar = factor(RowVar, levels = rev(clean_names)),
+    ColVar = factor(ColVar, levels = clean_names)
+  )
+
+# STEP 6: plot correlation matrix
+ggplot(cor_long, aes(x = ColVar, y = RowVar, fill = Correlation)) +
+  geom_tile(color = "white") +
+  geom_text(aes(label = ifelse(is.na(Correlation), "-", sprintf("%.2f", Correlation))),
+            size = 3) +
+  scale_fill_gradient2(midpoint = 0, limits = c(-1, 1), na.value = "white") +
+  labs(x = NULL, y = NULL, fill = "Correlation") +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    panel.grid = element_blank()
+  )
+
+# STEP 7: create table version with "-" instead of NA
+cor_table <- as.data.frame(cor_matrix_lower) %>%
+  rownames_to_column(var = "Variable")
+
+cor_table[is.na(cor_table)] <- "-"
+
+# STEP 8: create clean flextable
+ft_corr <- flextable(cor_table)
+ft_corr <- theme_booktabs(ft_corr)
+ft_corr <- autofit(ft_corr)
+ft_corr <- align(ft_corr, j = 1, align = "left", part = "all")
+ft_corr <- align(ft_corr, j = 2:ncol(cor_table), align = "center", part = "all")
+ft_corr <- bold(ft_corr, part = "header")
+ft_corr <- bold(ft_corr, j = 1, part = "body")
+ft_corr <- fontsize(ft_corr, size = 10, part = "all")
+
+ft_corr
+
+# STEP 9: export to Word
+doc <- read_docx()
+doc <- body_add_par(doc, "Table X: Correlation matrix for key variables", style = "Normal")
+doc <- body_add_par(
+  doc,
+  "This matrix reports pairwise Pearson correlation coefficients among the main analytical variables. Correlations are generally moderate, indicating no evidence of problematic multicollinearity.",
+  style = "Normal"
+)
+doc <- body_add_flextable(doc, ft_corr)
+
+print(doc, target = "correlation_matrix.docx")
+#time series rob
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+
+# STEP 1: create monthly time-series data
+ts_data <- final_esm_data %>%
+  mutate(
+    year_month = as.Date(paste0(year_month, "-01"))
+  ) %>%
+  group_by(year_month) %>%
+  summarise(
+    avg_CAR = mean(CAR, na.rm = TRUE),
+    avg_comm_intensity = mean((Regulation + Supervision) / 2, na.rm = TRUE),
+    crisis_month = max(crisis, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  mutate(
+    CAR_index = as.numeric(scale(avg_CAR)),
+    Comm_index = as.numeric(scale(avg_comm_intensity))
+  )
+
+# STEP 2: build shaded crisis periods
+ts_data <- ts_data %>%
+  arrange(year_month) %>%
+  mutate(
+    crisis_change = crisis_month != lag(crisis_month, default = first(crisis_month)),
+    crisis_group = cumsum(crisis_change)
+  )
+
+crisis_periods <- ts_data %>%
+  filter(crisis_month == 1) %>%
+  group_by(crisis_group) %>%
+  summarise(
+    xmin = min(year_month),
+    xmax = max(year_month),
+    .groups = "drop"
+  )
+
+# STEP 3: reshape data for plotting
+ts_plot_data <- ts_data %>%
+  select(year_month, CAR_index, Comm_index) %>%
+  pivot_longer(
+    cols = c(CAR_index, Comm_index),
+    names_to = "Series",
+    values_to = "Value"
+  ) %>%
+  mutate(
+    Series = recode(
+      Series,
+      "CAR_index" = "Average abnormal returns",
+      "Comm_index" = "Communication intensity"
+    )
+  )
+
+# STEP 4: plot with crisis shading
+ggplot() +
+  geom_rect(
+    data = crisis_periods,
+    aes(xmin = xmin, xmax = xmax, ymin = -Inf, ymax = Inf),
+    inherit.aes = FALSE,
+    fill = "grey80",
+    alpha = 0.5
+  ) +
+  geom_line(
+    data = ts_plot_data %>% filter(Series == "Average abnormal returns"),
+    aes(x = year_month, y = Value, color = Series),
+    linewidth = 0.9
+  ) +
+  geom_line(
+    data = ts_plot_data %>% filter(Series == "Communication intensity"),
+    aes(x = year_month, y = Value, color = Series),
+    linewidth = 0.9
+  ) +
+  scale_color_manual(
+    values = c(
+      "Average abnormal returns" = "steelblue",
+      "Communication intensity" = "firebrick"
+    )
+  ) +
+  labs(
+    x = NULL,
+    y = "Standardised monthly average",
+    color = NULL,
+    title = "Evolution of average abnormal returns and communication intensity over time"
+  ) +
+  scale_x_date(date_labels = "%Y", date_breaks = "1 year") +
+  theme_minimal() +
+  theme(
+    legend.position = "bottom",
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    panel.grid.minor = element_blank()
+  )
+ggplot() +
+  # Crisis shading WITH legend
+  geom_rect(
+    data = crisis_periods,
+    aes(xmin = xmin, xmax = xmax, ymin = -Inf, ymax = Inf, fill = "Crisis period"),
+    inherit.aes = FALSE,
+    alpha = 0.3
+  ) +
+  
+  # CAR line
+  geom_line(
+    data = ts_plot_data %>% filter(Series == "Average abnormal returns"),
+    aes(x = year_month, y = Value, color = "Average abnormal returns"),
+    linewidth = 0.9
+  ) +
+  
+  # Communication line
+  geom_line(
+    data = ts_plot_data %>% filter(Series == "Communication intensity"),
+    aes(x = year_month, y = Value, color = "Communication intensity"),
+    linewidth = 0.9
+  ) +
+  
+  # Color scale (lines)
+  scale_color_manual(
+    values = c(
+      "Average abnormal returns" = "steelblue",
+      "Communication intensity" = "firebrick"
+    )
+  ) +
+  
+  # Fill scale (crisis shading)
+  scale_fill_manual(
+    values = c("at least one relevant crisis affecting the sample" = "grey70")
+  ) +
+  
+  labs(
+    x = NULL,
+    y = "Standardised monthly average",
+    color = NULL,
+    fill = NULL,
+    title = "Evolution of average abnormal returns and communication intensity over time"
+  ) +
+  
+  scale_x_date(date_labels = "%Y", date_breaks = "1 year") +
+  
+  theme_minimal() +
+  theme(
+    legend.position = "bottom",
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    panel.grid.minor = element_blank()
+  )
 

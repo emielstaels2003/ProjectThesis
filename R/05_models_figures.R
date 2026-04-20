@@ -67,41 +67,21 @@ library(fixest)
 wald(m1.1_direction, keep = c("Regulation", "Supervision"))
 
 #basismodel -1,1
-m1.2_intensitydd <- feols(abs_CAR ~ Regulation + Supervision + 
+m1.2_intensity <- feols(abs_CAR ~ Regulation + Supervision + 
                             ROA + log(TotalAssets) + CapProxy | 
                             Ticker + year_month, 
                           data = final_esm_data)
-summary(m1.2_intensitydd)
-
-#-1,5
-m1.2_intensity <- feols(abs_CAR ~ Regulation + Supervision + 
-                           ROA + log(TotalAssets) + CapProxy | 
-                           Ticker + year_month, 
-                         data = final_esm_data)
 summary(m1.2_intensity)
 
-#-5,1
-m1.2_intensitybb <- feols(abs_CAR ~ Regulation + Supervision + 
-                          ROA + log(TotalAssets) + CapProxy | 
-                          Ticker + year_month, 
-                        data = final_esm_data)
-summary(m1.2_intensitybb)
-
-#-3,3
-m1.2_intensitycc <- feols(abs_CAR ~ Regulation + Supervision + 
-                            ROA + log(TotalAssets) + CapProxy | 
-                            Ticker + year_month, 
-                          data = final_esm_data)
-summary(m1.2_intensitycc)
 
 # Maak een lijst van je modellen voor de verschillende windows
 # Ik heb de namen gebaseerd op je screenshot
-robustness_models <- list(
-  "[-1, 1]" = m1.2_intensitydd, # Je basismodel
-  "[-1, 5]" = m1.2_intensity,   # Check je exacte modelnaam in R
-  "[-5, 1]" = m1.2_intensitybb,
-  "[-3, 3]" = m1.2_intensitycc
-)
+#robustness_models <- list(
+#  "[-1, 1]" = m1.2_intensitydd, # Je basismodel
+#  "[-1, 5]" = m1.2_intensity,   # Check je exacte modelnaam in R
+#  "[-5, 1]" = m1.2_intensitybb,
+#  "[-3, 3]" = m1.2_intensitycc
+#)
 
 # Genereer de vergelijkingstabel
 modelsummary(robustness_models,
@@ -355,6 +335,27 @@ m5.1_crisis_relevance <- feols(abs_CAR ~ Regulation * crisis +
                                data = final_esm_data)
 
 summary(m5.1_crisis_relevance)
+
+# Maak de lijst voor het crisis relevance model
+models_crisis_rel <- list("Crisis Relevance" = m5.1_crisis_relevance)
+
+# Genereer de horizontale tabel met groter lettertype
+modelsummary(models_crisis_rel, 
+             shape = model ~ term, 
+             fmt = 6, 
+             stars = TRUE,
+             coef_map = c(
+               "Regulation" = "Regulation",
+               "crisis" = "Crisis",
+               "Supervision" = "Supervision",
+               "ROA" = "ROA",
+               "log(TotalAssets)" = "Bank Size (log)",
+               "CapProxy" = "Capital Proxy",
+               "Regulation:crisis" = "Reg x Crisis",
+               "crisis:Supervision" = "Sup x Crisis"
+             ),
+             gof_map = c("nobs", "r.squared")
+)
 
 m5.2_crisis_sensitivity <- feols(CAR ~ Regulation * crisis + 
                                    Supervision * crisis + 

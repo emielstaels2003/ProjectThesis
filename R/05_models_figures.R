@@ -73,6 +73,44 @@ m1.2_intensity <- feols(abs_CAR ~ Regulation + Supervision +
                          data = final_esm_data)
 summary(m1.2_intensity)
 
+library(modelsummary)
+
+# Create a list for the model
+models <- list("Baseline CAR" = m1.1_direction)
+
+# Generate a horizontal table (Models in rows, Variables in columns)
+modelsummary(models, 
+             shape = model ~ term,        # This transposes the standard layout
+             fmt = 6,                     # Sets decimals to 6
+             stars = TRUE,                # Adds significance stars
+             coef_map = c(                # Professional labels
+               "Regulation" = "Regulation",
+               "Supervision" = "Supervision",
+               "ROA" = "ROA",
+               "log(TotalAssets)" = "Bank Size (log)",
+               "CapProxy" = "Capital Proxy"
+             ),
+             gof_map = c("nobs", "r.squared"), # Concise summary statistics
+             title = "Regression Summary")
+
+# Create a list for the model
+models <- list("Baseline |CAR|" = m1.2_intensity)
+
+# Generate a horizontal table (Models in rows, Variables in columns)
+modelsummary(models, 
+             shape = model ~ term,        # This transposes the standard layout
+             fmt = 6,                     # Sets decimals to 6
+             stars = TRUE,                # Adds significance stars
+             coef_map = c(                # Professional labels
+               "Regulation" = "Regulation",
+               "Supervision" = "Supervision",
+               "ROA" = "ROA",
+               "log(TotalAssets)" = "Bank Size (log)",
+               "CapProxy" = "Capital Proxy"
+             ),
+             gof_map = c("nobs", "r.squared"), # Concise summary statistics
+)
+
 # ONDERZOEKSVRAAG 2
 
 m2.1_tightness <- feols(CAR ~ Regulation + Supervision + Tightness + 
@@ -86,6 +124,43 @@ m2.2_tightness_interaction <- feols(CAR ~ Regulation * Tightness + Supervision *
                             Ticker + year_month, 
                           data = final_esm_data)
 summary(m2.2_tightness_interaction)
+
+# Create a list for the model
+models <- list("Tightness included" = m2.1_tightness)
+
+# Generate a horizontal table (Models in rows, Variables in columns)
+modelsummary(models, 
+             shape = model ~ term,        # This transposes the standard layout
+             fmt = 6,                     # Sets decimals to 6
+             stars = TRUE,                # Adds significance stars
+             coef_map = c(                # Professional labels
+               "Regulation" = "Regulation",
+               "Supervision" = "Supervision",
+               "Tightness" = "Tightness",
+               "ROA" = "ROA",
+               "log(TotalAssets)" = "Bank Size (log)",
+               "CapProxy" = "Capital Proxy"
+             ),
+             gof_map = c("nobs", "r.squared"), # Concise summary statistics
+)
+
+models_tightness <- list("Tightness Interaction" = m2.2_tightness_interaction)
+modelsummary(models_tightness, 
+             shape = model ~ term, 
+             fmt = 6, 
+             stars = TRUE,
+             coef_map = c(
+               "Regulation" = "Regulation",
+               "Tightness" = "Tightness",
+               "Supervision" = "Supervision",
+               "ROA" = "ROA",
+               "log(TotalAssets)" = "Bank Size (log)",
+               "CapProxy" = "Capital Proxy",
+               "Regulation:Tightness" = "Reg x Tight",
+               "Tightness:Supervision" = "Sup x Tight"
+             ),
+             gof_map = c("nobs", "r.squared")
+)
 
 # ONDERZOEKSVRAAG 3
 
@@ -111,6 +186,54 @@ m3.3_triple_power <- feols(CAR ~ Supervision * Tightness * Has_Supervisory_Power
                               data = final_esm_data)
 summary(m3.3_triple_power)
 
+
+# Maak de lijst voor het intensiteitsmodel
+models_intensity <- list("Power Intensity" = m3.1_power_intensity)
+
+# Genereer de horizontale tabel
+modelsummary(models_intensity, 
+             shape = model ~ term, 
+             fmt = 6, 
+             stars = TRUE,
+             coef_map = c(
+               "Regulation" = "Regulation",
+               "Supervision" = "Supervision",
+               "Has_Supervisory_Power" = "Supervisory Power",
+               "ROA" = "ROA",
+               "log(TotalAssets)" = "Bank Size (log)",
+               "CapProxy" = "Capital Proxy",
+               "Regulation:Has_Supervisory_Power" = "Reg x Power",
+               "Has_Supervisory_Power:Supervision" = "Sup x Power"
+             ),
+             gof_map = c("nobs", "r.squared")
+)
+
+models_triple <- list("TIRP" = m3.3_triple_power)
+
+# Horizontale tabel genereren
+modelsummary(models_triple, 
+             shape = model ~ term, 
+             fmt = 6, 
+             stars = TRUE,
+             coef_map = c(
+               "Supervision" = "Sup",
+               "Tightness" = "Tight",
+               "Has_Supervisory_Power" = "Power",
+               "Regulation" = "Reg",
+               "ROA" = "ROA",
+               "log(TotalAssets)" = "Size (log)",
+               "CapProxy" = "Cap Prox",
+               "Supervision:Tightness" = "Sup x Tight",
+               "Supervision:Has_Supervisory_Power" = "Sup x Power",
+               "Tightness:Has_Supervisory_Power" = "Tight x Power",
+               "Tightness:Regulation" = "Tight x Reg",
+               "Has_Supervisory_Power:Regulation" = "Power x Reg",
+               "Supervision:Tightness:Has_Supervisory_Power" = "Sup x Tight x Power",
+               "Tightness:Has_Supervisory_Power:Regulation" = "Reg x Tight x Power"
+             ),
+             gof_map = c("nobs", "r.squared")
+)
+
 # ONDERZOEKSVRAAG 4
 
 m4.1_gsib_intensity <- feols(abs_CAR ~ Regulation * is_GSIB + 
@@ -119,6 +242,25 @@ m4.1_gsib_intensity <- feols(abs_CAR ~ Regulation * is_GSIB +
                                Ticker + year_month, 
                              data = final_esm_data)
 summary(m4.1_gsib_intensity)
+
+models_gsib <- list("G-SIB Intensity" = m4.1_gsib_intensity)
+
+# Genereer de horizontale tabel met groter lettertype
+modelsummary(models_gsib, 
+             shape = model ~ term, 
+             fmt = 6, 
+             stars = TRUE,
+             coef_map = c(
+               "Regulation" = "Regulation",
+               "Supervision" = "Supervision",
+               "ROA" = "ROA",
+               "log(TotalAssets)" = "Bank Size (log)",
+               "CapProxy" = "Capital Proxy",
+               "Regulation:is_GSIB" = "Reg x GSIB",
+               "is_GSIB:Supervision" = "Sup x GSIB"
+             ),
+             gof_map = c("nobs", "r.squared")
+)
 
 m4.2_gsib_direction <- feols(CAR ~ Regulation * is_GSIB + 
                                       Supervision * is_GSIB + 
@@ -134,6 +276,31 @@ m4.3_triple_gsib <- feols(CAR ~ Supervision * Tightness * is_GSIB +
                             Ticker + year_month, 
                           data = final_esm_data)
 summary(m4.3_triple_gsib)
+
+models_triple_gsib <- list("TIRGSIB" = m4.3_triple_gsib)
+
+# Horizontale tabel genereren met groter lettertype
+modelsummary(models_triple_gsib, 
+             shape = model ~ term, 
+             fmt = 6, 
+             stars = TRUE,
+             coef_map = c(
+               "Supervision" = "Sup",
+               "Tightness" = "Tight",
+               "Regulation" = "Reg",
+               "ROA" = "ROA",
+               "log(TotalAssets)" = "Size (log)",
+               "CapProxy" = "Cap Prox",
+               "Supervision:Tightness" = "Sup x Tight",
+               "Supervision:is_GSIB" = "Sup x GSIB",
+               "Tightness:is_GSIB" = "Tight x GSIB",
+               "Tightness:Regulation" = "Tight x Reg",
+               "is_GSIB:Regulation" = "GSIB x Reg",
+               "Supervision:Tightness:is_GSIB" = "Sup x Tight x GSIB",
+               "Tightness:is_GSIB:Regulation" = "Tight x GSIB x Reg"
+             ),
+             gof_map = c("nobs", "r.squared")
+)
 
 # ONDERZOEKSVRAAG 5
 
@@ -161,6 +328,32 @@ m5.3_crisis_triple <- feols(CAR ~ Supervision * Tightness * crisis +
                             data = final_esm_data)
 
 summary(m5.3_crisis_triple)
+
+models_crisis <- list("TIRC" = m5.3_crisis_triple)
+
+# Genereer de horizontale tabel
+modelsummary(models_crisis, 
+             shape = model ~ term, 
+             fmt = 6, 
+             stars = TRUE,
+             coef_map = c(
+               "Supervision" = "Sup",
+               "Tightness" = "Tight",
+               "crisis" = "Crisis",
+               "Regulation" = "Reg",
+               "ROA" = "ROA",
+               "log(TotalAssets)" = "Size (log)",
+               "CapProxy" = "Cap Prox",
+               "Supervision:Tightness" = "Sup x Tight",
+               "Supervision:crisis" = "Sup x Crisis",
+               "Tightness:crisis" = "Tight x Crisis",
+               "Tightness:Regulation" = "Tight x Reg",
+               "crisis:Regulation" = "Crisis x Reg",
+               "Supervision:Tightness:crisis" = "Sup x Tight x Crisis",
+               "Tightness:crisis:Regulation" = "Tight x Crisis x Reg"
+             ),
+             gof_map = c("nobs", "r.squared")
+)
 
 m5.4_vix_relevance <- feols(abs_CAR ~ Regulation * VIX_Level + 
                               Supervision * VIX_Level +
@@ -1102,3 +1295,41 @@ ggplot() +
     panel.grid.minor = element_blank()
   )
 
+library(car)
+# Functie om VIF te berekenen via een hulp-OLS (omdat vif() niet op feols werkt)
+check_vif <- function(model_formula, data_set) {
+  # We halen de onafhankelijke variabelen uit jouw feols formule
+  temp_ols <- lm(model_formula, data = data_set)
+  return(vif(temp_ols))
+}
+
+# --- ONDERZOEKSVRAAG 1 & 2 (Basis) ---
+# Check de VIF op de variabelen die in m1.1, m1.2 en m2.1 zitten
+vif_ov1_2 <- check_vif(CAR ~ Regulation + Supervision + Tightness + ROA + log(TotalAssets) + CapProxy, 
+                       final_esm_data)
+
+# --- ONDERZOEKSVRAAG 3 (Power) ---
+# Check de hoofdeffecten voor m3.1 en m3.2
+vif_ov3 <- check_vif(CAR ~ Regulation + Supervision + Tightness + Has_Supervisory_Power + ROA + log(TotalAssets) + CapProxy, 
+                     final_esm_data)
+
+# --- ONDERZOEKSVRAAG 4 (G-SIB) ---
+# Check de hoofdeffecten voor m4.1 en m4.2
+vif_ov4 <- check_vif(CAR ~ Regulation + Supervision + Tightness + is_GSIB + ROA + log(TotalAssets) + CapProxy, 
+                     final_esm_data)
+
+# --- ONDERZOEKSVRAAG 5 (Crisis & VIX) ---
+# Voor m5.1 t/m m5.3 (Crisis)
+vif_ov5_crisis <- check_vif(CAR ~ Regulation + Supervision + Tightness + crisis + ROA + log(TotalAssets) + CapProxy, 
+                            final_esm_data)
+
+# Voor m5.4 t/m m5.6 (VIX)
+vif_ov5_vix <- check_vif(CAR ~ Regulation + Supervision + Tightness + VIX_Level + ROA + log(TotalAssets) + CapProxy, 
+                         final_esm_data)
+
+# --- RESULTATEN PRINTEN ---
+vif_ov1_2
+vif_ov3
+vif_ov4
+vif_ov5_crisis
+vif_ov5_vix

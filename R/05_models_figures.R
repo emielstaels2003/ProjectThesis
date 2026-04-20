@@ -66,12 +66,56 @@ summary(m1.1_direction)
 library(fixest)
 wald(m1.1_direction, keep = c("Regulation", "Supervision"))
 
+#basismodel -1,1
+m1.2_intensitydd <- feols(abs_CAR ~ Regulation + Supervision + 
+                            ROA + log(TotalAssets) + CapProxy | 
+                            Ticker + year_month, 
+                          data = final_esm_data)
+summary(m1.2_intensitydd)
 
+#-1,5
 m1.2_intensity <- feols(abs_CAR ~ Regulation + Supervision + 
                            ROA + log(TotalAssets) + CapProxy | 
                            Ticker + year_month, 
                          data = final_esm_data)
 summary(m1.2_intensity)
+
+#-5,1
+m1.2_intensitybb <- feols(abs_CAR ~ Regulation + Supervision + 
+                          ROA + log(TotalAssets) + CapProxy | 
+                          Ticker + year_month, 
+                        data = final_esm_data)
+summary(m1.2_intensitybb)
+
+#-3,3
+m1.2_intensitycc <- feols(abs_CAR ~ Regulation + Supervision + 
+                            ROA + log(TotalAssets) + CapProxy | 
+                            Ticker + year_month, 
+                          data = final_esm_data)
+summary(m1.2_intensitycc)
+
+# Maak een lijst van je modellen voor de verschillende windows
+# Ik heb de namen gebaseerd op je screenshot
+robustness_models <- list(
+  "[-1, 1]" = m1.2_intensitydd, # Je basismodel
+  "[-1, 5]" = m1.2_intensity,   # Check je exacte modelnaam in R
+  "[-5, 1]" = m1.2_intensitybb,
+  "[-3, 3]" = m1.2_intensitycc
+)
+
+# Genereer de vergelijkingstabel
+modelsummary(robustness_models,
+             fmt = 6,
+             stars = TRUE,
+             coef_map = c(
+               "Regulation" = "Regulation",
+               "Supervision" = "Supervision",
+               "ROA" = "ROA",
+               "log(TotalAssets)" = "Bank Size (log)",
+               "CapProxy" = "Capital Proxy"
+             ),
+             gof_map = c("nobs", "r.squared"),
+)
 
 library(modelsummary)
 

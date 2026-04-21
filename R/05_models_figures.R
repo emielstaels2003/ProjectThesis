@@ -9,10 +9,10 @@ final_esm_data <- final_esm_data %>%
     CapProxy = as.numeric(as.character(CapProxy)),
     InterbankRatio = as.numeric(as.character(InterbankRatio)),
     # Categorieën (factoren laten)
-    # Regulation = as.factor(Regulation),
-    # Supervision = as.factor(Supervision)
-    Regulation = as.numeric(as.character(Regulation)),
-    Supervision = as.numeric(as.character(Supervision))
+    Regulation = as.factor(Regulation),
+    Supervision = as.factor(Supervision),
+   # Regulation = as.numeric(as.character(Regulation)),
+  # Supervision = as.numeric(as.character(Supervision))
   )
 
 final_esm_data_FF3 <- final_esm_data_FF3 %>%
@@ -24,11 +24,12 @@ final_esm_data_FF3 <- final_esm_data_FF3 %>%
     CapProxy = as.numeric(as.character(CapProxy)),
     InterbankRatio = as.numeric(as.character(InterbankRatio)),
     # Categorieën (factoren laten)
-    # Regulation = as.factor(Regulation),
-    # Supervision = as.factor(Supervision)
-    Regulation = as.numeric(as.character(Regulation)),
-    Supervision = as.numeric(as.character(Supervision))
+    Regulation = as.factor(Regulation),
+   Supervision = as.factor(Supervision)
+   # Regulation = as.numeric(as.character(Regulation)),
+   #  Supervision = as.numeric(as.character(Supervision))
   )
+
 
 final_esm_lagged_data <- final_esm_lagged_data %>%
   mutate(
@@ -39,10 +40,10 @@ final_esm_lagged_data <- final_esm_lagged_data %>%
     CapProxy = as.numeric(as.character(CapProxy)),
     InterbankRatio = as.numeric(as.character(InterbankRatio)),
     # Categorieën (factoren laten)
-    # Regulation = as.factor(Regulation),
-    # Supervision = as.factor(Supervision)
-    Regulation = as.numeric(as.character(Regulation)),
-    Supervision = as.numeric(as.character(Supervision))
+     Regulation = as.factor(Regulation),
+     Supervision = as.factor(Supervision)
+    # Regulation = as.numeric(as.character(Regulation)),
+    # Supervision = as.numeric(as.character(Supervision))
   )
 
 # De kolom year_month aanmaken (als je dat nog niet gedaan had)
@@ -67,11 +68,30 @@ library(fixest)
 wald(m1.1_direction, keep = c("Regulation", "Supervision"))
 
 #basismodel -1,1
-m1.2_intensity <- feols(abs_CAR ~ Regulation + Supervision + 
+m1.2_intensity <- feols(abs_CAR ~ i(Regulation) + i(Supervision) + 
                             ROA + log(TotalAssets) + CapProxy | 
                             Ticker + year_month, 
                           data = final_esm_data)
 summary(m1.2_intensity)
+
+intensity_summary <- list("Categorical Intensity Model" = m1.2_intensity)
+
+# Genereer de horizontale samenvattingstabel
+modelsummary(intensity_summary, 
+             shape = model ~ term, 
+             fmt = 6, 
+             stars = TRUE,
+             coef_map = c(
+               "Regulation::1" = "Regulation (L1)",
+               "Regulation::2" = "Regulation (L2)",
+               "Supervision::1" = "Supervision (L1)",
+               "Supervision::2" = "Supervision (L2)",
+               "ROA" = "ROA",
+               "log(TotalAssets)" = "Bank Size (log)",
+               "CapProxy" = "Capital Proxy"
+             ),
+             gof_map = c("nobs", "r.squared")
+)
 
 
 # Maak een lijst van je modellen voor de verschillende windows

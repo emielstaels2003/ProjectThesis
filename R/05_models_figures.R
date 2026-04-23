@@ -9,10 +9,10 @@ final_esm_data <- final_esm_data %>%
     CapProxy = as.numeric(as.character(CapProxy)),
     InterbankRatio = as.numeric(as.character(InterbankRatio)),
     # Categorieën (factoren laten)
-    Regulation = as.factor(Regulation),
-    Supervision = as.factor(Supervision),
-   # Regulation = as.numeric(as.character(Regulation)),
-  # Supervision = as.numeric(as.character(Supervision))
+   # Regulation = as.factor(Regulation),
+  #  Supervision = as.factor(Supervision),
+   Regulation = as.numeric(as.character(Regulation)),
+  Supervision = as.numeric(as.character(Supervision))
   )
 
 final_esm_data_FF3 <- final_esm_data_FF3 %>%
@@ -24,10 +24,10 @@ final_esm_data_FF3 <- final_esm_data_FF3 %>%
     CapProxy = as.numeric(as.character(CapProxy)),
     InterbankRatio = as.numeric(as.character(InterbankRatio)),
     # Categorieën (factoren laten)
-    Regulation = as.factor(Regulation),
-   Supervision = as.factor(Supervision)
-   # Regulation = as.numeric(as.character(Regulation)),
-   #  Supervision = as.numeric(as.character(Supervision))
+ #   Regulation = as.factor(Regulation),
+#   Supervision = as.factor(Supervision),
+   Regulation = as.numeric(as.character(Regulation)),
+   Supervision = as.numeric(as.character(Supervision))
   )
 
 
@@ -40,10 +40,10 @@ final_esm_lagged_data <- final_esm_lagged_data %>%
     CapProxy = as.numeric(as.character(CapProxy)),
     InterbankRatio = as.numeric(as.character(InterbankRatio)),
     # Categorieën (factoren laten)
-     Regulation = as.factor(Regulation),
-     Supervision = as.factor(Supervision)
-    # Regulation = as.numeric(as.character(Regulation)),
-    # Supervision = as.numeric(as.character(Supervision))
+    # Regulation = as.factor(Regulation),
+    # Supervision = as.factor(Supervision),
+    Regulation = as.numeric(as.character(Regulation)),
+    Supervision = as.numeric(as.character(Supervision))
   )
 
 # De kolom year_month aanmaken (als je dat nog niet gedaan had)
@@ -67,14 +67,71 @@ summary(m1.1_direction)
 library(fixest)
 wald(m1.1_direction, keep = c("Regulation", "Supervision"))
 
-#basismodel -1,1
-m1.2_intensity <- feols(abs_CAR ~ i(Regulation) + i(Supervision) + 
+##basismodel -1,1
+m1.2_intensity <- feols(abs_CAR ~ Regulation + Supervision + 
                             ROA + log(TotalAssets) + CapProxy | 
                             Ticker + year_month, 
                           data = final_esm_data)
 summary(m1.2_intensity)
 
-intensity_summary <- list("Categorical Intensity Model" = m1.2_intensity)
+#zonder bank controls
+m1.2_intensity_withoutBC <- feols(abs_CAR ~ Regulation + Supervision | 
+                          Ticker + year_month, 
+                        data = final_esm_data)
+summary(m1.2_intensity_withoutBC)
+
+#zonder fixed effects
+m1.2_intensity_withoutFE <- feols(abs_CAR ~ Regulation + Supervision + ROA + log(TotalAssets) + CapProxy,
+                                  data = final_esm_data)
+summary(m1.2_intensity_withoutFE)
+
+# zonder BC en zonder FE
+m1.2_intensity_withoutBCFE <- feols(abs_CAR ~ Regulation + Supervision, 
+                        data = final_esm_data)
+summary(m1.2_intensity_withoutBCFE)
+
+library(modelsummary)
+library(kableExtra)
+
+# Maak een lijst van de modellen uit je screenshot
+models_comparison <- list(
+  "Without Bank Controls"   = m1.2_intensity_withoutBC,
+  "Without Fixed Effects"   = m1.2_intensity_withoutFE,
+  "Without Bank Controls & Fixed Effects" = m1.2_intensity_withoutBCFE,
+  "With Bank Controls & Fixed Effects" = m1.2_intensity
+)
+
+# Genereer de vergelijkingstabel
+modelsummary(models_comparison,
+             fmt = 6,
+             stars = TRUE,
+             coef_map = c(
+               "(Intercept)" = "Constant",
+               "Regulation" = "Regulation",
+               "Supervision" = "Supervision",
+               "ROA" = "ROA",
+               "log(TotalAssets)" = "Bank Size (log)",
+               "CapProxy" = "Capital Proxy"
+             ),
+             gof_map = c("nobs", "r.squared"),
+)
+
+direction_summary <- list("Baseline CAR" = m1.1_direction)
+
+# Genereer de horizontale samenvattingstabel
+modelsummary(direction_summary, 
+             shape = model ~ term, 
+             fmt = 6, 
+             stars = TRUE,
+             coef_map = c(
+               "Regulation" = "Regulation",
+               "Supervision" = "Supervision",
+               "ROA" = "ROA",
+               "log(TotalAssets)" = "Bank Size (log)",
+               "CapProxy" = "Capital Proxy"
+             ),
+             gof_map = c("nobs", "r.squared")
+)
 
 # Genereer de horizontale samenvattingstabel
 modelsummary(intensity_summary, 

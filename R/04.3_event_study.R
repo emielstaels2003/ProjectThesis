@@ -151,3 +151,25 @@ table(final_esm_lagged_data$is_GSIB)
 # --- Absolute CAR
 final_esm_lagged_data$abs_CAR <- abs(final_esm_lagged_data$CAR)
 
+# Eigen robuuste winsorize functie
+simple_winsorize <- function(x) {
+  # Bereken de grenzen (1% en 99%)
+  q <- quantile(x, probs = c(0.01, 0.99), na.rm = TRUE)
+  # Stel waarden buiten de grenzen gelijk aan de grenzen
+  x[x < q[1]] <- q[1]
+  x[x > q[2]] <- q[2]
+  return(x)
+}
+
+# Pas toe op je dataset
+message("Bezig met handmatige winsorizing van de data...")
+
+final_esm_lagged_data <- final_esm_lagged_data %>%
+  mutate(
+    CAR         = simple_winsorize(as.numeric(CAR)),
+    abs_CAR     = simple_winsorize(as.numeric(abs_CAR)),
+    ROA         = simple_winsorize(as.numeric(ROA)),
+    CapProxy    = simple_winsorize(as.numeric(CapProxy)),
+    TotalAssets = simple_winsorize(as.numeric(TotalAssets))
+  )
+

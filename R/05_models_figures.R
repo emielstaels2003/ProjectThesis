@@ -11,7 +11,7 @@ final_esm_data <- final_esm_data %>%
     # Categorieën (factoren laten)
    # Regulation = as.factor(Regulation),
   #  Supervision = as.factor(Supervision),
-   Regulation = as.numeric(as.character(Regulation)),
+  Regulation = as.numeric(as.character(Regulation)),
   Supervision = as.numeric(as.character(Supervision))
   )
 
@@ -133,8 +133,14 @@ modelsummary(direction_summary,
              gof_map = c("nobs", "r.squared")
 )
 
+m1.2_intensityCAT <- feols(abs_CAR ~ i(Regulation) + i(Supervision) + 
+                          ROA + log(TotalAssets) + CapProxy | 
+                          Ticker + year_month, 
+                        data = final_esm_data)
+summary(m1.2_intensityCAT)
+modelsCAT <- list("Categorical Intensity Model" = m1.2_intensityCAT)
 # Genereer de horizontale samenvattingstabel
-modelsummary(intensity_summary, 
+modelsummary(modelsCAT, 
              shape = model ~ term, 
              fmt = 6, 
              stars = TRUE,
@@ -150,15 +156,30 @@ modelsummary(intensity_summary,
              gof_map = c("nobs", "r.squared")
 )
 
+m1.2_intensityRechts <- feols(abs_CAR ~ Regulation + Supervision + 
+                          ROA + log(TotalAssets) + CapProxy | 
+                          Ticker + year_month, 
+                        data = final_esm_data)
+summary(m1.2_intensityRechts)
+m1.2_intensityLinks <- feols(abs_CAR ~ Regulation + Supervision + 
+                                ROA + log(TotalAssets) + CapProxy | 
+                                Ticker + year_month, 
+                              data = final_esm_data)
+summary(m1.2_intensityLinks)
+m1.2_intensityGroot <- feols(abs_CAR ~ Regulation + Supervision + 
+                               ROA + log(TotalAssets) + CapProxy | 
+                               Ticker + year_month, 
+                             data = final_esm_data)
+summary(m1.2_intensityGroot)
 
 # Maak een lijst van je modellen voor de verschillende windows
 # Ik heb de namen gebaseerd op je screenshot
-#robustness_models <- list(
-#  "[-1, 1]" = m1.2_intensitydd, # Je basismodel
-#  "[-1, 5]" = m1.2_intensity,   # Check je exacte modelnaam in R
-#  "[-5, 1]" = m1.2_intensitybb,
-#  "[-3, 3]" = m1.2_intensitycc
-#)
+robustness_models <- list(
+  "[-1, 1]" = m1.2_intensity, # Je basismodel
+  "[-1, 5]" = m1.2_intensityRechts,   # Check je exacte modelnaam in R
+  "[-5, 1]" = m1.2_intensityLinks,
+  "[-3, 3]" = m1.2_intensityGroot
+)
 
 # Genereer de vergelijkingstabel
 modelsummary(robustness_models,
@@ -219,7 +240,10 @@ m2.1_tightness <- feols(CAR ~ Regulation + Supervision + Tightness +
                           Ticker + year_month, 
                         data = final_esm_data)
 summary(m2.1_tightness)
-wald(m2.1_tightness, keep = "Regulation|Supervision|Tightness")
+
+wald(m2.1_tightness, keep = c("Regulation", "Supervision", "Tightness"))
+wald(m2.1_tightness, keep = "Regulation| Supervision | Tightness")
+
 m2.2_tightness_interaction <- feols(CAR ~ Regulation * Tightness + Supervision * Tightness +
                             ROA + log(TotalAssets) + CapProxy | 
                             Ticker + year_month, 
@@ -414,7 +438,7 @@ m5.1_crisis_relevance <- feols(abs_CAR ~ Regulation * crisis +
 summary(m5.1_crisis_relevance)
 
 # Maak de lijst voor het crisis relevance model
-models_crisis_rel <- list("Crisis Relevance" = m5.1_crisis_relevance)
+models_crisis_rel <- list("Crisis Intensity" = m5.1_crisis_relevance)
 
 # Genereer de horizontale tabel met groter lettertype
 modelsummary(models_crisis_rel, 
@@ -499,6 +523,95 @@ m5.6_vix_triple <- feols(CAR ~ Supervision * Tightness * VIX_Level +
                          data = final_esm_data)
 
 summary(m5.6_vix_triple)
+
+#### Robuustheidscheck NO CRISIS
+
+data_no_crisis <- subset(final_esm_data, crisis == 0)
+
+m1.1_directionNC <- feols(CAR ~ Regulation + Supervision + 
+                          ROA + log(TotalAssets) + CapProxy | 
+                          Ticker + year_month, 
+                        data = data_no_crisis)
+m1.2_intensityNC <- feols(abs_CAR ~ Regulation + Supervision + 
+                          ROA + log(TotalAssets) + CapProxy | 
+                          Ticker + year_month, 
+                        data = data_no_crisis)
+
+m2.1_tightnessNC <- feols(CAR ~ Regulation + Supervision + Tightness + 
+                          ROA + log(TotalAssets) + CapProxy | 
+                          Ticker + year_month, 
+                        data = data_no_crisis)
+m2.2_tightness_interactionNC <- feols(CAR ~ Regulation * Tightness + Supervision * Tightness +
+                                      ROA + log(TotalAssets) + CapProxy | 
+                                      Ticker + year_month, 
+                                    data = data_no_crisis)
+
+m3.1_power_intensityNC <- feols(abs_CAR ~ Regulation * Has_Supervisory_Power + 
+                                Supervision * Has_Supervisory_Power + 
+                                ROA + log(TotalAssets) + CapProxy | 
+                                Ticker + year_month, 
+                              data = data_no_crisis)
+m3.2_power_directionNC <- feols(CAR ~ Regulation * Has_Supervisory_Power + 
+                                Supervision * Has_Supervisory_Power + 
+                                Tightness * Has_Supervisory_Power + 
+                                ROA + log(TotalAssets) + CapProxy | 
+                                Ticker + year_month, 
+                              data = data_no_crisis)
+m3.3_triple_powerNC <- feols(CAR ~ Supervision * Tightness * Has_Supervisory_Power + 
+                             Regulation * Tightness * Has_Supervisory_Power +
+                             ROA + log(TotalAssets) + CapProxy | 
+                             Ticker + year_month, 
+                           data = data_no_crisis)
+
+m4.1_gsib_intensityNC <- feols(abs_CAR ~ Regulation * is_GSIB + 
+                               Supervision * is_GSIB + 
+                               ROA + log(TotalAssets) + CapProxy | 
+                               Ticker + year_month, 
+                             data = data_no_crisis)
+m4.2_gsib_directionNC <- feols(CAR ~ Regulation * is_GSIB + 
+                               Supervision * is_GSIB + 
+                               Tightness * is_GSIB +
+                               ROA + log(TotalAssets) + CapProxy | 
+                               Ticker + year_month, 
+                             data = data_no_crisis)
+m4.3_triple_gsibNC <- feols(CAR ~ Supervision * Tightness * is_GSIB + 
+                            Regulation * Tightness * is_GSIB + 
+                            ROA + log(TotalAssets) + CapProxy | 
+                            Ticker + year_month, 
+                          data = data_no_crisis)
+
+m5.1_crisis_relevanceNC <- feols(abs_CAR ~ Regulation * crisis + 
+                                 Supervision * crisis + 
+                                 ROA + log(TotalAssets) + CapProxy | 
+                                 Ticker + year_month, 
+                               data = data_no_crisis)
+m5.2_crisis_sensitivityNC <- feols(CAR ~ Regulation * crisis + 
+                                   Supervision * crisis + 
+                                   Tightness * crisis + 
+                                   ROA + log(TotalAssets) + CapProxy | 
+                                   Ticker + year_month, 
+                                 data = data_no_crisis)
+m5.3_crisis_tripleNC <- feols(CAR ~ Supervision * Tightness * crisis + 
+                              Regulation * Tightness * crisis + 
+                              ROA + log(TotalAssets) + CapProxy | 
+                              Ticker + year_month, 
+                            data = data_no_crisis)
+m5.4_vix_relevanceNC <- feols(abs_CAR ~ Regulation * VIX_Level + 
+                              Supervision * VIX_Level +
+                              ROA + log(TotalAssets) + CapProxy | 
+                              Ticker + year_month, 
+                            data = data_no_crisis)
+m5.5_vix_sensitivityNC <- feols(CAR ~ Regulation * VIX_Level + 
+                                Supervision * VIX_Level + 
+                                Tightness * VIX_Level + 
+                                ROA + log(TotalAssets) + CapProxy | 
+                                Ticker + year_month, 
+                              data = data_no_crisis)
+m5.6_vix_tripleNC <- feols(CAR ~ Supervision * Tightness * VIX_Level + 
+                           Regulation * Tightness * VIX_Level + 
+                           ROA + log(TotalAssets) + CapProxy | 
+                           Ticker + year_month, 
+                         data = data_no_crisis)
 
 ########## OBV FAMA FRENCH
 
@@ -761,9 +874,11 @@ library(kableExtra)
 
 O1 <- list(
   "Market |CAR|" = m1.2_intensity,
+  "Market |CAR| NC" = m1.2_intensityNC,
   "FF |CAR|" = ff3_r1_intensity,
   "lagged |CAR|" = lag_m1_2_intensity,
   "Market CAR" = m1.1_direction,
+  "Market CAR NC" = m1.1_directionNC,
   "FF CAR" = ff3_r1_direction,
   "lagged CAR" = lag_m1_1_direction
 )
@@ -792,9 +907,11 @@ modelsummary(O1,
 
 O2 <- list(
   "Market CAR" = m2.1_tightness,
+  "Market CAR NC" = m2.1_tightnessNC,
   "FF CAR" = ff3_r2_tightness,
   "lagged CAR" = lag_m2_1_tightness,
   "Market CAR interaction" = m2.2_tightness_interaction,
+  "Market CAR interaction NC" = m2.2_tightness_interactionNC,
   "FF CAR interaction" = ff3_r2_tightness_interact,
   "lagged CAR interaction" = lag_m2_2_tightness_interaction
 )
@@ -836,12 +953,15 @@ modelsummary(O2,
 
 O3 <- list(
   "Market |CAR|" = m3.1_power_intensity,
+  "Market |CAR| NC" = m3.1_power_intensityNC,
   "FF |CAR|" = ff3_r3_power_intensity,
   "lagged |CAR|" = lag_m3_1_power_intensity,
   "Market Double CAR" = m3.2_power_direction,
+  "Market Double CAR NC" = m3.2_power_directionNC,
   "FF Double CAR" = ff3_r3_power_direction,
   "Lagged Double CAR" = lag_m3_2_power_direction,
   "Market Triple CAR" = m3.3_triple_power,
+  "Market Triple CAR NC" = m3.3_triple_powerNC,
   "FF Triple CAR" = ff3_r3_triple_power,
   "Lagged Tripple CAR" = lag_m3_3_triple_power
 )
@@ -923,12 +1043,15 @@ modelsummary(O3,
 
 O4 <- list(
   "Market |CAR|" = m4.1_gsib_intensity,
+  "Market |CAR| NC" = m4.1_gsib_intensityNC,
   "FF |CAR|" = ff3_r4_gsib_intensity,
   "lagged |CAR|" = lag_m4_1_gsib_intensity,
   "Market Double CAR" = m4.2_gsib_direction,
+  "Market Double CAR NC" = m4.2_gsib_directionNC,
   "FF Double CAR" = ff3_r4_gsib_direction,
   "Lagged Double CAR" = lag_m4_2_gsib_direction,
   "Market Triple CAR" = m4.3_triple_gsib,
+  "Market Triple CAR NC" = m4.3_triple_gsibNC,
   "FF Triple CAR" = ff3_r4_triple_gsib,
   "Lagged Tripple CAR" = lag_m4_3_triple_gsib
 )

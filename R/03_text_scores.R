@@ -98,7 +98,7 @@ speeches_subset <- speeches_subset %>%
 
 # (Gebruik de 'assign_zero_inflated_intensity' functie die je al in je script had staan) omzetten van continue naar ordinale variabele
 #speeches_subset <- speeches_subset %>%
- # mutate(
+#  mutate(
 #    Regulation  = assign_zero_inflated_intensity(raw_R),
 #    Supervision = assign_zero_inflated_intensity(raw_S)
 #  )

@@ -115,37 +115,39 @@ tickers <- c(
 
 supervision_dates <- data.frame(
   bank = c(
-    "European Central Bank",
-    "Board of Governors of the Federal Reserve",
+    "European Central Bank",      # nog op te zoeken maar normaal vanaf 2014 algemeen geweten: 4/11/2014
+    "Board of Governors of the Federal Reserve", # 21/07/2010
     "Reserve Bank of Australia",
     "Bank of Mexico",
     "Bank of Canada",
     "Bank of Japan",
     "Bank of England",
-    "Central Bank of Argentina",
-    "Central Bank of Brazil",
-    "People's Bank of China",
-    "Reserve Bank of India",
+    "Central Bank of Argentina",  #1/1/1990
+    "Central Bank of Brazil",     #1/1/2000
+    "People's Bank of China",     # niet de central bank! dus geen datum!
+    "Reserve Bank of India",      #1/4/2016
     "Bank Indonesia",
     "Bank of Korea",
-    "Bank of Russia",
-    "Saudi Central Bank",
+    "Bank of Russia",             #1/1/2007
+    "Saudi Central Bank",         # geen data beschikbaar, nog opzoeken! 11/6/1966 KLOPT!!!!
     "Central Bank of the Republic of Turkey",
-    "South African Reserve Bank",
+    "South African Reserve Bank", # geen data beschikbaar, nog opzoeken! 1/2/1991 MOET HET ZIJN
     "Swiss National Bank"
   ),
   direct_supervisory_power_date = as.Date(c(
-    "2014-11-04","1913-12-23",NA,NA,NA,NA,
-    "2013-04-01","1992-09-30","1964-12-31",
-    "1984-01-01","1949-01-01",NA,NA,
-    "2002-07-10","1966-06-11",NA,
-    "2018-04-01",NA
+    "2014-11-04","2010-07-21",NA,NA,NA,NA,
+    "2013-04-01","1990-01-01",
+    "2000-01-01", NA,"2016-04-01",NA,NA,
+    "2007-01-01","1966-06-11",NA,
+    "1991-02-01",NA
   )),
   has_direct_power = c(
     TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, TRUE, TRUE, TRUE,
-    TRUE, TRUE, FALSE, FALSE, TRUE, TRUE, FALSE, TRUE, FALSE
+    FALSE, TRUE, FALSE, FALSE, TRUE, TRUE, FALSE, TRUE, FALSE
   )
 )
+
+print(supervision_dates)
 
 aantal <- length(tickers)
 # Toon het resultaat in de console

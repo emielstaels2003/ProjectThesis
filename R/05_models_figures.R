@@ -15,6 +15,21 @@ final_esm_data <- final_esm_data %>%
   Supervision = as.numeric(as.character(Supervision))
   )
 
+final_esm_dataECB <- final_esm_dataECB %>%
+  mutate(
+    # Variabelen
+    ROA = as.numeric(as.character(ROA)),
+    TotalAssets = as.numeric(as.character(TotalAssets)),
+    TotalEquity = as.numeric(as.character(TotalEquity)),
+    CapProxy = as.numeric(as.character(CapProxy)),
+    InterbankRatio = as.numeric(as.character(InterbankRatio)),
+    # Categorieën (factoren laten)
+    # Regulation = as.factor(Regulation),
+    #  Supervision = as.factor(Supervision),
+    Regulation = as.numeric(as.character(Regulation)),
+    Supervision = as.numeric(as.character(Supervision))
+  )
+
 final_esm_data_FF3 <- final_esm_data_FF3 %>%
   mutate(
     # Variabelen
@@ -48,6 +63,8 @@ final_esm_lagged_data <- final_esm_lagged_data %>%
 
 # De kolom year_month aanmaken (als je dat nog niet gedaan had)
 final_esm_data$year_month <- format(as.Date(final_esm_data$SpeechDate), "%Y-%m")
+
+final_esm_dataECB$year_month <- format(as.Date(final_esm_dataECB$SpeechDate), "%Y-%m")
 
 # De kolom year_month aanmaken (als je dat nog niet gedaan had)
 final_esm_data_FF3$year_month <- format(as.Date(final_esm_data_FF3$SpeechDate), "%Y-%m")
@@ -311,6 +328,77 @@ m3.3_triple_power <- feols(CAR ~ Supervision * Tightness * Has_Supervisory_Power
                               data = final_esm_data)
 summary(m3.3_triple_power)
 
+m3.1_power_intensityECB <- feols(abs_CAR ~ Regulation * Has_Supervisory_Power + 
+                                Supervision * Has_Supervisory_Power + 
+                                ROA + log(TotalAssets) + CapProxy | 
+                                Ticker + year_month, 
+                              data = final_esm_dataECB)
+summary(m3.1_power_intensityECB)
+
+m3.2_power_directionECB <- feols(CAR ~ Regulation * Has_Supervisory_Power + 
+                                Supervision * Has_Supervisory_Power + 
+                                Tightness * Has_Supervisory_Power + 
+                                ROA + log(TotalAssets) + CapProxy | 
+                                Ticker + year_month, 
+                              data = final_esm_dataECB)
+summary(m3.2_power_directionECB)
+
+m3.3_triple_powerECB <- feols(CAR ~ Supervision * Tightness * Has_Supervisory_Power + 
+                             Regulation * Tightness * Has_Supervisory_Power +
+                             ROA + log(TotalAssets) + CapProxy | 
+                             Ticker + year_month, 
+                           data = final_esm_dataECB)
+summary(m3.3_triple_powerECB)
+
+# Zet de modellen in een lijst en geef ze duidelijke namen
+models <- list(
+  "(1) Intensity" = m3.1_power_intensity,
+  "(2) Intensity (ECB Check)" = m3.1_power_intensityECB,
+  "(3) Direction" = m3.2_power_direction,
+  "(4) Direction (ECB Check)" = m3.2_power_directionECB,
+  "(5) Triple"    = m3.3_triple_power,
+  "(6) Triple (ECB Check)"    = m3.3_triple_powerECB
+)
+
+# Maak de tabel
+modelsummary(models,
+  fmt = 6,
+  coef_map = c(
+    "Regulation" = "Regulation",
+    "Supervision" = "Supervision",
+    "Has_Supervisory_Power" = "Supervisory Power (Dummy)",
+    "Tightness" = "Tightness (Tone)",
+    "ROA" = "ROA",
+    "log(TotalAssets)" = "Bank size (log)",
+    "CapProxy" = "Capital Proxy",
+    
+    # Interacties voor Model 1 & 2
+    "Regulation:Has_Supervisory_Power" = "Regulation × Power",
+    "Has_Supervisory_Power:Regulation" = "Regulation × Power",
+    
+    # Supervision x Power
+    "Supervision:Has_Supervisory_Power" = "Supervision × Power",
+    "Has_Supervisory_Power:Supervision" = "Supervision × Power",
+    
+    # Tightness x Power
+    "Tightness:Has_Supervisory_Power" = "Tightness × Power",
+    "Has_Supervisory_Power:Tightness" = "Tightness × Power",
+    
+    
+    # Triple Interacties voor Model 3
+    "Regulation:Tightness" = "Regulation × Tightness",
+    "Tightness:Regulation" = "Regulation × Tightness",
+    
+    # Supervision x Tightness
+    "Supervision:Tightness" = "Supervision × Tightness",
+    "Tightness:Supervision" = "Supervision × Tightness",
+    "Supervision:Tightness:Has_Supervisory_Power" = "Supervision × Tightness × Power",
+    "Tightness:Has_Supervisory_Power:Regulation" = "Regulation × Tightness × Power"),
+  stars = TRUE,     
+  title = "Table: Robustness Check - Central Bank Supervisory Power",
+  notes = "Models 2, 4 and 6 exclude pre-2014 ECB observations.",
+  gof_map = c("nobs", "r.squared", "adj.r.squared")
+)
 
 # Maak de lijst voor het intensiteitsmodel
 models_intensity <- list("Power Intensity" = m3.1_power_intensity)

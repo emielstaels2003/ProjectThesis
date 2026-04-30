@@ -83,6 +83,8 @@ m1.1_direction <- feols(CAR ~ Regulation + Supervision +
 summary(m1.1_direction)
 library(fixest)
 wald(m1.1_direction, keep = c("Regulation", "Supervision"))
+wald(m1.2_intensity, keep = c("Regulation", "Supervision"))
+
 
 ##basismodel -1,1
 m1.2_intensity <- feols(abs_CAR ~ Regulation + Supervision + 

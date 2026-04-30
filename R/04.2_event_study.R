@@ -32,10 +32,6 @@ colnames(ff3_xts) <- c("MKT_RF","SMB","HML","RF")
 
 head(ff3)
 
-
-final_esm_data_FF3 <- final_esm_data %>%
-  left_join(ff3, by = c("SpeechDate" = "date"))
-
 #FF model toepassen
 
 results_list_FF <- list()
@@ -152,21 +148,34 @@ cr_local <- Crisis %>%
   filter(!is.na(Index_Ticker), Index_Ticker != "") %>%
   select(start_date, end_date, Index_Ticker)
 
+# Wijziging: controleer de conditie per rij met rowwise en any() om dubbele rijen te voorkomen
 final_esm_data_FF3 <- final_esm_data_FF3 %>%
-  left_join(cr_local, by = "Index_Ticker") %>%
+  rowwise() %>%
   mutate(crisis = ifelse(
-    crisis == 1L | (!is.na(start_date) & SpeechDate >= start_date & SpeechDate <= end_date),
-    1L, crisis
+    crisis == 1L | any(
+      cr_local$Index_Ticker == Index_Ticker & 
+        SpeechDate >= cr_local$start_date & 
+        SpeechDate <= cr_local$end_date
+    ),
+    1L, 
+    crisis
   )) %>%
-  select(-start_date, -end_date)
+  ungroup()
+
+# --- Vervolg: Supervision dates, VIX, G-SIB, abs_CAR
 
 final_esm_data_FF3 <- final_esm_data_FF3 %>%
+  # 1. Plak de startdata uit de referentietabel aan je dataset
   left_join(supervision_dates, by = c("CentralBank" = "bank")) %>%
+  
+  # 2. Maak de dummy aan
   mutate(Has_Supervisory_Power = ifelse(
     !is.na(direct_supervisory_power_date) & SpeechDate >= direct_supervisory_power_date, 
     1, 
     0
   )) %>%
+  
+  # 3. Optioneel: verwijder de hulp-datumkolom weer als je die niet nodig hebt
   select(-direct_supervisory_power_date)
 
 # Check het resultaat
@@ -175,23 +184,24 @@ head(final_esm_data_FF3)
 #View(final_esm_data_FF3)
 
 final_esm_data_FF3$SpeechDate <- as.Date(final_esm_data_FF3$SpeechDate)
-
 # Voeg de VIX kolom toe aan de dataset
 final_esm_data_FF3 <- final_esm_data_FF3 %>%
   left_join(vix_df, by = "SpeechDate") %>%
   arrange(SpeechDate) %>%
+  # Vul ontbrekende waarden (weekenden) in met de laatst bekende koers
   fill(VIX_Level, .direction = "down") 
 
-# Voeg GSIB dummy toe
+
+# 2. Voeg de kolom toe aan final_esm_data_FF3
 final_esm_data_FF3 <- final_esm_data_FF3 %>%
   mutate(is_GSIB = ifelse(Ticker %in% gsib_tickers, 1, 0))
 
-# Controle
+# 3. Controle: Hoeveel observaties zijn gelinkt aan een G-SIB?
 table(final_esm_data_FF3$is_GSIB)
 
-# Absolute CAR
-final_esm_data_FF3$abs_CAR <- abs(final_esm_data_FF3$CAR)
 
+# Maak een nieuwe kolom aan met de absolute waarde van de CAR
+final_esm_data_FF3$abs_CAR <- abs(final_esm_data_FF3$CAR)
 
 
 # Eigen robuuste winsorize functie

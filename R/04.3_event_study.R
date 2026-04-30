@@ -111,45 +111,66 @@ cr_local <- Crisis %>%
   filter(!is.na(Index_Ticker), Index_Ticker != "") %>%
   select(start_date, end_date, Index_Ticker)
 
+# Wijziging: controleer de conditie per rij met rowwise en any() om dubbele rijen te voorkomen
 final_esm_lagged_data <- final_esm_lagged_data %>%
-  left_join(cr_local, by = "Index_Ticker") %>%
+  rowwise() %>%
   mutate(crisis = ifelse(
-    crisis == 1L | (!is.na(start_date) & SpeechDate >= start_date & SpeechDate <= end_date),
-    1L, crisis
+    crisis == 1L | any(
+      cr_local$Index_Ticker == Index_Ticker & 
+        SpeechDate >= cr_local$start_date & 
+        SpeechDate <= cr_local$end_date
+    ),
+    1L, 
+    crisis
   )) %>%
-  select(-start_date, -end_date)
+  ungroup()
 
-# --- Supervisory power dummy
+# --- Vervolg: Supervision dates, VIX, G-SIB, abs_CAR ---
+
 final_esm_lagged_data <- final_esm_lagged_data %>%
+  # 1. Plak de startdata uit de referentietabel aan je dataset
   left_join(supervision_dates, by = c("CentralBank" = "bank")) %>%
+  
+  # 2. Maak de dummy aan
   mutate(Has_Supervisory_Power = ifelse(
     !is.na(direct_supervisory_power_date) & SpeechDate >= direct_supervisory_power_date, 
     1, 
     0
   )) %>%
+  
+  # 3. Optioneel: verwijder de hulp-datumkolom weer als je die niet nodig hebt
   select(-direct_supervisory_power_date)
 
-# Check
+# Check het resultaat
 head(final_esm_lagged_data)
 
-# --- Ensure date format
-final_esm_lagged_data$SpeechDate <- as.Date(final_esm_lagged_data$SpeechDate)
+#View(final_esm_lagged_data)
 
-# --- Add VIX
+final_esm_lagged_data$SpeechDate <- as.Date(final_esm_lagged_data$SpeechDate)
+# Voeg de VIX kolom toe aan de dataset
 final_esm_lagged_data <- final_esm_lagged_data %>%
   left_join(vix_df, by = "SpeechDate") %>%
   arrange(SpeechDate) %>%
-  fill(VIX_Level, .direction = "down")
+  # Vul ontbrekende waarden (weekenden) in met de laatst bekende koers
+  fill(VIX_Level, .direction = "down") 
 
-# --- GSIB dummy
+
+# 2. Voeg de kolom toe aan final_esm_lagged_data
 final_esm_lagged_data <- final_esm_lagged_data %>%
   mutate(is_GSIB = ifelse(Ticker %in% gsib_tickers, 1, 0))
 
-# Check GSIB distribution
+# 3. Controle: Hoeveel observaties zijn gelinkt aan een G-SIB?
 table(final_esm_lagged_data$is_GSIB)
 
-# --- Absolute CAR
+
+# Maak een nieuwe kolom aan met de absolute waarde van de CAR
 final_esm_lagged_data$abs_CAR <- abs(final_esm_lagged_data$CAR)
+
+
+# --- STAP 3: WINSORIZING (Robuustheid tegen uitschieters) ---
+# Installeer DescTools indien nog niet aanwezig: install.packages("DescTools")
+install.packages("DescTools")
+library(DescTools)
 
 # Eigen robuuste winsorize functie
 simple_winsorize <- function(x) {
@@ -166,10 +187,16 @@ message("Bezig met handmatige winsorizing van de data...")
 
 final_esm_lagged_data <- final_esm_lagged_data %>%
   mutate(
-    CAR         = simple_winsorize(as.numeric(CAR)),
-    abs_CAR     = simple_winsorize(as.numeric(abs_CAR)),
-    ROA         = simple_winsorize(as.numeric(ROA)),
-    CapProxy    = simple_winsorize(as.numeric(CapProxy)),
-    TotalAssets = simple_winsorize(as.numeric(TotalAssets))
+    CAR           = simple_winsorize(as.numeric(CAR)),
+    abs_CAR       = simple_winsorize(as.numeric(abs_CAR)),
+    ROA           = simple_winsorize(as.numeric(ROA)),
+    CapProxy      = simple_winsorize(as.numeric(CapProxy)),
+    TotalAssets   = simple_winsorize(as.numeric(TotalAssets))
   )
+
+summary(final_esm_lagged_data$CAR)
+
+
+
+
 

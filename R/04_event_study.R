@@ -117,14 +117,21 @@ cr_local <- Crisis %>%
   filter(!is.na(Index_Ticker), Index_Ticker != "") %>%
   select(start_date, end_date, Index_Ticker)
 
+# Wijziging: controleer de conditie per rij met rowwise en any() om dubbele rijen te voorkomen
 final_esm_data <- final_esm_data %>%
-  left_join(cr_local, by = "Index_Ticker") %>%
+  rowwise() %>%
   mutate(crisis = ifelse(
-    crisis == 1L | (!is.na(start_date) & SpeechDate >= start_date & SpeechDate <= end_date),
-    1L, crisis
+    crisis == 1L | any(
+      cr_local$Index_Ticker == Index_Ticker & 
+        SpeechDate >= cr_local$start_date & 
+        SpeechDate <= cr_local$end_date
+    ),
+    1L, 
+    crisis
   )) %>%
-  select(-start_date, -end_date)
+  ungroup()
 
+# --- Vervolg: Supervision dates, VIX, G-SIB, abs_CAR
 
 final_esm_data <- final_esm_data %>%
   # 1. Plak de startdata uit de referentietabel aan je dataset

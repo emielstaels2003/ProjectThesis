@@ -98,7 +98,7 @@ final_esm_dataECB <- final_esm_dataECB %>%
     1L, crisis
   ))
 
-# --- 2) Lokale crises
+# --- 2) Lokale crises (apply only if Index_Ticker matches AND within interval)
 cr_local <- Crisis %>%
   rename(start_date = `start date`, end_date = `end date`) %>%
   mutate(start_date = as.Date(start_date),
@@ -110,14 +110,21 @@ cr_local <- Crisis %>%
   filter(!is.na(Index_Ticker), Index_Ticker != "") %>%
   select(start_date, end_date, Index_Ticker)
 
+# Wijziging: controleer de conditie per rij met rowwise en any() om dubbele rijen te voorkomen
 final_esm_dataECB <- final_esm_dataECB %>%
-  left_join(cr_local, by = "Index_Ticker") %>%
+  rowwise() %>%
   mutate(crisis = ifelse(
-    crisis == 1L | (!is.na(start_date) & SpeechDate >= start_date & SpeechDate <= end_date),
-    1L, crisis
+    crisis == 1L | any(
+      cr_local$Index_Ticker == Index_Ticker & 
+        SpeechDate >= cr_local$start_date & 
+        SpeechDate <= cr_local$end_date
+    ),
+    1L, 
+    crisis
   )) %>%
-  select(-start_date, -end_date)
+  ungroup()
 
+# --- Vervolg: Supervision dates, VIX, G-SIB, abs_CAR ---
 
 final_esm_dataECB <- final_esm_dataECB %>%
   # 1. Plak de startdata uit de referentietabel aan je dataset
@@ -130,22 +137,32 @@ final_esm_dataECB <- final_esm_dataECB %>%
     0
   )) %>%
   
-  # 3. Optioneel: verwijder de hulp-datumkolom
+  # 3. Optioneel: verwijder de hulp-datumkolom weer als je die niet nodig hebt
   select(-direct_supervisory_power_date)
 
-final_esm_dataECB$SpeechDate <- as.Date(final_esm_dataECB$SpeechDate)
+# Check het resultaat
+head(final_esm_dataECB)
 
-# Voeg de VIX kolom toe
+#View(final_esm_dataECB)
+
+final_esm_dataECB$SpeechDate <- as.Date(final_esm_dataECB$SpeechDate)
+# Voeg de VIX kolom toe aan de dataset
 final_esm_dataECB <- final_esm_dataECB %>%
   left_join(vix_df, by = "SpeechDate") %>%
   arrange(SpeechDate) %>%
+  # Vul ontbrekende waarden (weekenden) in met de laatst bekende koers
   fill(VIX_Level, .direction = "down") 
 
-# Voeg GSIB kolom toe
+
+# 2. Voeg de kolom toe aan final_esm_dataECB
 final_esm_dataECB <- final_esm_dataECB %>%
   mutate(is_GSIB = ifelse(Ticker %in% gsib_tickers, 1, 0))
 
-# Absolute waarde van CAR
+# 3. Controle: Hoeveel observaties zijn gelinkt aan een G-SIB?
+table(final_esm_dataECB$is_GSIB)
+
+
+# Maak een nieuwe kolom aan met de absolute waarde van de CAR
 final_esm_dataECB$abs_CAR <- abs(final_esm_dataECB$CAR)
 
 # --- STAP 3: WINSORIZING ---

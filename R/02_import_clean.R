@@ -29,9 +29,6 @@ eerste_datum <- min(ecb_speeches$Date, na.rm = TRUE)
 # Toon het resultaat
 print(eerste_datum)
 
-speeches_robustness <- subset(speeches_subset, 
-                              !(CentralBank == "European Central Bank" & Date_Original < as.Date("2014-11-04")))
-
 # 5. Bekijk het resultaat
 #View(speeches_subset)
 
@@ -51,6 +48,8 @@ speeches_subset <- speeches_subset %>%
   rename_with(~ "Date_Original", matches("^Date$|^date$")) %>%
   mutate(Date_Clean = as.Date(as.character(Date_Original)))
 
+speeches_robustness <- subset(speeches_subset, 
+                              !(CentralBank == "European Central Bank" & Date_Original < as.Date("2014-11-04")))
 
 # --- YAHOO: DATA CLEANING & CACHING ---
 all_tickers <- unique(c(Bank_Mapping$Ticker, Bank_Mapping$Index_Ticker))

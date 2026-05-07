@@ -88,6 +88,7 @@ speeches_subset <- speeches_subset %>%
     #lm_pos_count = count_pos_with_negation(text_up, positieve_woorden),
     #raw_sentiment = (lm_pos_count - lm_neg_count) / word_count
   )
+
 #Omzetten naar finale variabelen
 # Voor Tightness gebruiken we de continue Z-score (nauwkeuriger voor regressie)
 speeches_subset <- speeches_subset %>%
@@ -123,6 +124,14 @@ table(speeches_subset$Supervision)
 View(speeches_subset)
 
 
+library(dplyr)
+
+# Zoek de speech met de hoogste tightness score
+speech_max <- speeches_subset %>%
+  filter(Tightness == max(Tightness, na.rm = TRUE))
+
+# Bekijk het resultaat in de console
+print(speech_max)
 
 
 

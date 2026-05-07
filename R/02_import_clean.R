@@ -29,6 +29,8 @@ eerste_datum <- min(ecb_speeches$Date, na.rm = TRUE)
 # Toon het resultaat
 print(eerste_datum)
 
+speeches_subset$speech_id <- 1:nrow(speeches_subset)
+
 # 5. Bekijk het resultaat
 #View(speeches_subset)
 
@@ -77,5 +79,13 @@ chartSeries(STOXX50E,
             subset = "1997::2025",     # periode
             theme = chartTheme("white"), 
             name = "STOXX50E (Adjusted Close Price)",
+            TA = NULL)                 # Geen extra indicatoren
+
+getSymbols("^VIX", from = "1997-01-01", to = Sys.Date())
+chartSeries(VIX,
+            type = "line",             # lijnplot
+            subset = "1997::2025",     # periode
+            theme = chartTheme("white"), 
+            name = "VIX",
             TA = NULL)                 # Geen extra indicatoren
 

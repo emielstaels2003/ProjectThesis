@@ -560,3 +560,144 @@ ft <- align(ft, align = "center", part = "all")
 ft <- bold(ft, part = "header")
 
 ft
+
+
+
+library(dplyr)
+library(tidyr)
+library(knitr)
+library(kableExtra)
+
+summary_table <- final_esm_data %>%
+  
+  # Nieuwe variabele (veilig voor log)
+  mutate(log_TA = ifelse(TotalAssets > 0, log(TotalAssets), NA_real_)) %>%
+  
+  # Selecteer variabelen
+  select(CAR, abs_CAR, Regulation, Supervision, Tightness,
+         ROA, log_TA, CapProxy) %>%
+  
+  # Zorg dat alles numeriek is (veilig)
+  mutate(across(everything(), ~as.numeric(.))) %>%
+  
+  # Summary stats
+  summarise(across(
+    everything(),
+    list(
+      Mean   = ~mean(.x, na.rm = TRUE),
+      SD     = ~sd(.x, na.rm = TRUE),
+      Min    = ~min(.x, na.rm = TRUE),
+      Median = ~median(.x, na.rm = TRUE),
+      Max    = ~max(.x, na.rm = TRUE),
+      N      = ~sum(!is.na(.x))
+    ),
+    .names = "{.col}___{.fn}"
+  )) %>%
+  
+  # Long → wide
+  pivot_longer(
+    cols = everything(),
+    names_to = c("Variable", "Statistic"),
+    names_sep = "___"
+  ) %>%
+  pivot_wider(names_from = Statistic, values_from = value) %>%
+  
+  # Mooie namen (FIX: expliciet dplyr::recode)
+  mutate(
+    Variable = dplyr::recode(
+      Variable,
+      "CAR" = "CAR",
+      "abs_CAR" = "Absolute CAR",
+      "Regulation" = "Regulation",
+      "Supervision" = "Supervision",
+      "Tightness" = "Tightness",
+      "ROA" = "ROA",
+      "log_TA" = "Log Total Assets",
+      "CapProxy" = "Capital Ratio Proxy"
+    )
+  ) %>%
+  
+  # Afronden
+  mutate(across(c(Mean, SD, Min, Median, Max), ~round(.x, 3))) %>%
+  
+  # Volgorde
+  select(Variable, N, Mean, SD, Min, Median, Max)
+
+# Mooie tabel
+kable(summary_table, caption = "Summary Statistics") %>%
+  kable_styling(full_width = FALSE, position = "center") %>%
+  row_spec(0, bold = TRUE)
+
+
+
+
+
+
+
+
+library(dplyr)
+library(tidyr)
+library(knitr)
+library(kableExtra)
+
+summary_table <- final_esm_data %>%
+  
+  # Nieuwe variabele (veilig voor log)
+  mutate(log_TA = ifelse(TotalAssets > 0, log(TotalAssets), NA_real_)) %>%
+  
+  # Selecteer variabelen 
+  # (Let op: controleer of de kolomnamen exact overeenkomen met jouw 'final_esm_data')
+  select(CAR, abs_CAR, Regulation, Supervision, Tightness,
+         ROA, log_TA, CapProxy) %>%
+  
+  # Zorg dat alles numeriek is (veilig)
+  mutate(across(everything(), ~as.numeric(.))) %>%
+  
+  # Summary stats
+  summarise(across(
+    everything(),
+    list(
+      Mean   = ~mean(.x, na.rm = TRUE),
+      SD     = ~sd(.x, na.rm = TRUE),
+      Min    = ~min(.x, na.rm = TRUE),
+      Median = ~median(.x, na.rm = TRUE),
+      Max    = ~max(.x, na.rm = TRUE),
+      N      = ~sum(!is.na(.x))
+    ),
+    .names = "{.col}___{.fn}"
+  )) %>%
+  
+  # Long → wide
+  pivot_longer(
+    cols = everything(),
+    names_to = c("Variable", "Statistic"),
+    names_sep = "___"
+  ) %>%
+  pivot_wider(names_from = Statistic, values_from = value) %>%
+  
+  # Hernoemen naar nette namen
+  mutate(
+    Variable = dplyr::recode(
+      Variable,
+      "CAR" = "CAR",
+      "abs_CAR" = "Absolute CAR",
+      "Regulation" = "Regulation",
+      "Supervision" = "Supervision",
+      "Tightness" = "Tightness",
+      "ROA" = "ROA",
+      "log_TA" = "Log Total Assets",
+      "CapProxy" = "Capital Ratio Proxy" # Pas dit eventueel aan naar "Capital Ratio Proxy" als dat de kolomnaam is
+    )
+  ) %>%
+  
+  # Afronden op 3 decimalen
+  mutate(across(c(Mean, SD, Min, Median, Max), ~round(.x, 3))) %>%
+  
+  # Volgorde van de kolommen exact zoals in de afbeelding
+  select(Variable, Mean, SD, Min, Median, Max, N)
+
+# Mooie tabel voor in je document
+kable(summary_table, caption = "Summary Statistics") %>%
+  kable_styling(full_width = FALSE, position = "center") %>%
+  row_spec(0, bold = TRUE)
+

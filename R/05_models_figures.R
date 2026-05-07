@@ -9,7 +9,7 @@ final_esm_data <- final_esm_data %>%
     CapProxy = as.numeric(as.character(CapProxy)),
     InterbankRatio = as.numeric(as.character(InterbankRatio)),
     # Categorieën (factoren laten)
-   # Regulation = as.factor(Regulation),
+  # Regulation = as.factor(Regulation),
   #  Supervision = as.factor(Supervision),
   Regulation = as.numeric(as.character(Regulation)),
   Supervision = as.numeric(as.character(Supervision))
@@ -449,6 +449,7 @@ modelsummary(models_triple,
              gof_map = c("nobs", "r.squared")
 )
 
+
 # ONDERZOEKSVRAAG 4
 
 m4.1_gsib_intensity <- feols(abs_CAR ~ Regulation * is_GSIB + 
@@ -516,6 +517,79 @@ modelsummary(models_triple_gsib,
              ),
              gof_map = c("nobs", "r.squared")
 )
+final_esm_datamutated <- final_esm_data %>%
+  mutate(
+    GSIB = as.numeric(is_GSIB),  # 1 = G-SIB, 0 = D-SIB
+    Reg_GSIB = Regulation * GSIB,
+    Sup_GSIB = Supervision * GSIB
+  )
+
+m4.1_gsib_intensitySFE <- feols(abs_CAR ~ Regulation * is_GSIB + 
+                                  Supervision * is_GSIB+ 
+                                  ROA + log(TotalAssets) + CapProxy | 
+                                  Ticker + Speech_ID, 
+                                data = final_esm_data,
+                                cluster = ~Ticker+Speech_ID)
+summary(m4.1_gsib_intensitySFE)
+
+m4.1_gsib_intensitySFE <- feols(abs_CAR ~ Reg_GSIB + 
+                               Sup_GSIB+ 
+                               ROA + log(TotalAssets) + CapProxy | 
+                               Ticker + Speech_ID, 
+                             data = final_esm_datamutated,
+                             cluster = ~Ticker+Speech_ID)
+summary(m4.1_gsib_intensitySFE)
+
+model_gsib_direction_speechFE <- feols(CAR ~ Reg_GSIB + 
+                                  Sup_GSIB + 
+                                  ROA + log(TotalAssets) + CapProxy | 
+                                  Ticker + Speech_ID, 
+                                data = final_esm_datamutated,
+                                cluster = ~Ticker+Speech_ID)
+summary(model_gsib_direction_speechFE)
+
+mods <- list("Intensity" = m4.1_gsib_intensitySFE,
+                           "Direction" = model_gsib_direction_speechFE)
+
+# Horizontale tabel genereren met groter lettertype
+modelsummary(mods, 
+             shape = model ~ term, 
+             fmt = 6, 
+             stars = TRUE,
+             coef_map = c(
+               "ROA" = "ROA",
+               "log(TotalAssets)" = "Size (log)",
+               "CapProxy" = "Cap Prox",
+               "Sup_GSIB" = "Sup x GSIB",
+               "Reg_GSIB" = "GSIB x Reg"
+             ),
+             gof_map = c("nobs", "r.squared")
+)
+
+
+model_gsib_speechFE <- feols(
+  abs_CAR ~ Regulation * is_GSIB + Supervision * is_GSIB + ROA + log(TotalAssets) + CapProxy |
+    bank_id + Speech_ID,
+  data = final_esm_data,
+  cluster = ~speech_id
+)
+
+summary(model_gsib_speechFE)
+
+m4.1_gsib_intensitySFE <- feols(abs_CAR ~ Regulation * is_GSIB + 
+                                  Supervision * is_GSIB + 
+                                  ROA + log(TotalAssets) + CapProxy | 
+                                  Ticker + year_month + Supervision, 
+                                data = final_esm_data)
+summary(m4.1_gsib_intensitySFE)
+
+m4.1_gsib_intensitySFE <- feols(abs_CAR ~ Regulation * is_GSIB + 
+                                  Supervision * is_GSIB + 
+                                  ROA + log(TotalAssets) + CapProxy | 
+                                  Ticker + year_month + Regulation, 
+                                data = final_esm_data)
+summary(m4.1_gsib_intensitySFE)
+
 
 # ONDERZOEKSVRAAG 5
 
@@ -613,6 +687,7 @@ m5.6_vix_triple <- feols(CAR ~ Supervision * Tightness * VIX_Level +
                          data = final_esm_data)
 
 summary(m5.6_vix_triple)
+
 
 #### Robuustheidscheck NO CRISIS
 
@@ -1643,6 +1718,9 @@ check_vif <- function(model_formula, data_set) {
 vif_ov1_2 <- check_vif(CAR ~ Regulation + Supervision + Tightness + ROA + log(TotalAssets) + CapProxy, 
                        final_esm_data)
 
+vif_ov1_2abs <- check_vif(abs_CAR ~ Regulation + Supervision + Tightness + ROA + log(TotalAssets) + CapProxy, 
+                       final_esm_data)
+
 # --- ONDERZOEKSVRAAG 3 (Power) ---
 # Check de hoofdeffecten voor m3.1 en m3.2
 vif_ov3 <- check_vif(CAR ~ Regulation + Supervision + Tightness + Has_Supervisory_Power + ROA + log(TotalAssets) + CapProxy, 
@@ -1664,7 +1742,80 @@ vif_ov5_vix <- check_vif(CAR ~ Regulation + Supervision + Tightness + VIX_Level 
 
 # --- RESULTATEN PRINTEN ---
 vif_ov1_2
+vif_ov1_2abs
 vif_ov3
 vif_ov4
 vif_ov5_crisis
 vif_ov5_vix
+
+log(final_esm_data$TotalAssets)
+
+library(dplyr)
+library(Hmisc)
+log_TotalAssets = log(final_esm_data$TotalAssets)
+
+corr_data <- final_esm_data %>%
+  mutate(log_TotalAssets = log(TotalAssets)) %>% # Maak de kolom aan in de dataframe
+  select(
+    CAR,
+    abs_CAR,
+    Regulation,
+    Supervision,
+    Tightness,
+    ROA,
+    log_TotalAssets, # Selecteer de nieuw aangemaakte kolom
+    CapProxy
+  ) %>%
+  na.omit()
+
+corr_matrix <- rcorr(as.matrix(corr_data), type = "pearson")$r
+
+corr_matrix <- round(corr_matrix, 2)
+
+corr_table <- as.data.frame(corr_matrix)
+
+corr_table[upper.tri(corr_table)] <- "-"
+
+diag(corr_table) <- 1
+corr_table
+
+library(corrplot)
+
+
+library(dplyr)
+library(knitr)
+library(kableExtra)
+
+# 1. Voorbereiden van de data
+corr_data <- final_esm_data %>%
+  mutate(log_TotalAssets = log(TotalAssets)) %>% 
+  select(CAR, abs_CAR, Regulation, Supervision, Tightness, 
+         ROA, log_TotalAssets, CapProxy) %>%
+  na.omit()
+
+# 2. Bereken de correlatiematrix
+corr_matrix <- cor(corr_data, use = "complete.obs")
+
+# 3. Afronden op 2 decimalen en omzetten naar dataframe
+corr_df <- round(corr_matrix, 2)
+
+# 4. Maak de matrix op als een lagere driehoek (lower triangle)
+corr_df[upper.tri(corr_df)] <- "-"
+diag(corr_df) <- "1.00"
+
+# 5. Hernoem de kolommen en rijen voor de thesis
+colnames(corr_df) <- c("CAR", "Absolute CAR", "Regulation", "Supervision", 
+                       "Tightness", "ROA", "Log Total Assets", "Capital Proxy")
+rownames(corr_df) <- c("CAR", "Absolute CAR", "Regulation", "Supervision", 
+                       "Tightness", "ROA", "Log Total Assets", "Capital Proxy")
+
+# 6. Genereer de verzorgde tabel
+kable(corr_df, 
+      caption = "Pearson Correlation Matrix", 
+      booktabs = TRUE, 
+      align = rep("c", ncol(corr_df))) %>%
+  kable_styling(full_width = FALSE, 
+                position = "center", 
+                bootstrap_options = c("hover", "condensed")) %>%
+  row_spec(0, bold = TRUE, color = "#333333") %>% # Achtergrondkleur is hier verwijderd
+  column_spec(1, bold = TRUE, color = "#333333")

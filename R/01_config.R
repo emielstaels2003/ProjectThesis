@@ -155,7 +155,7 @@ print(paste("De lijst bevat", aantal, "tickers."))
 
 # Global settings
 EVENT_WINDOW_START <- -1       # trading days
-EVENT_WINDOW_EINDE <- 5      # trading days
+EVENT_WINDOW_EINDE <- 1      # trading days
 EST_WINDOW_START<- -250        # trading days
 EST_WINDOW_EINDE <- -30        # trading days     
 
